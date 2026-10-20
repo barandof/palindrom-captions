@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>PALINDROM CAPTIONS</title>
+<meta name="theme-color" content="#10151e" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Titulky" />
+<meta name="format-detection" content="telephone=no" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="manifest" href="manifest.webmanifest" />
+<style>
+:root{color-scheme:dark;--bg:#10151e;--panel:#1b2431;--panel2:#202d3e;--line:#334357;--text:#f4f7ff;--muted:#b3c0d2;--blue:#5b8ff0;--red:#d13f43;--yellow:#f5d340}
+*{box-sizing:border-box}body{font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;margin:0;background:radial-gradient(circle at 5% -15%,#24456a 0,transparent 38%),var(--bg);color:var(--text)}
+header{border-bottom:1px solid #2d4058;background:#121a26d9}header .wrap{max-width:1390px;margin:auto;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{font-size:21px;font-weight:900;letter-spacing:2px}.brand b{color:#6e9bf0}.tag{color:#abc2e1;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+.wrap.main{max-width:1390px;margin:26px auto;padding:0 25px 35px;display:grid;grid-template-columns:minmax(390px,1.05fr) minmax(340px,.95fr);gap:22px}
+.panel{background:linear-gradient(145deg,#1e2838,#19222f);border:1px solid #334456;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px #05080c28}
+.panel h2{font-size:18px;margin:0 0 12px;font-weight:800}.pad{padding:22px}.micro{font-size:12px;color:var(--muted)}
+.preview{background:#090d14;min-height:300px;display:flex;align-items:center;justify-content:center;position:relative;border-bottom:1px solid #324257}
+#canvas{display:block;max-width:100%;max-height:71vh;object-fit:contain;background:#0a0e14;box-shadow:0 3px 32px #0005;touch-action:none;cursor:default}
+/* The video stays full-size (but invisible) behind the canvas: iOS Safari may stop decoding frames of a 1px video. */
+#canvas{position:relative;z-index:1}#media{position:absolute;inset:0;width:100%;height:100%;opacity:.01;pointer-events:none;z-index:0}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);-webkit-text-size-adjust:100%}
+input,textarea{font-size:16px!important}/* 16px prevents iOS auto-zoom on focus */
+.save-row [hidden]{display:none!important}.save-row{display:none;gap:10px;margin-top:12px}.save-row.show{display:grid;grid-template-columns:1fr 1fr}.save-row button,.save-row a{min-height:50px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center}
+.link-btn{background:none;border:0;color:#9db9e6;padding:4px 2px;font-size:12px;text-decoration:underline;min-width:auto}.link-btn:hover{background:none}
+.empty{position:absolute;text-align:center;color:#98acc8;font-size:15px;padding:30px;pointer-events:none}
+.empty strong{display:block;color:white;margin:10px 0;font-size:20px}
+.controls{display:flex;align-items:center;gap:12px;margin-top:16px}.controls button{min-width:86px}#seek{flex:1;min-width:50px;accent-color:#6197f2}#clock{font-variant-numeric:tabular-nums;font-size:13px;color:#bbcbe0;min-width:88px;text-align:right}
+button,.upload{cursor:pointer;border:1px solid #4973a7;background:#2f4f7c;color:#f7faff;border-radius:10px;padding:12px 15px;font-size:14px;font-weight:750;font-family:inherit;transition:background .12s}button:hover,.upload:hover{background:#41689c}button:disabled{cursor:not-allowed;opacity:.46}button.primary{background:#4c7ed2;border-color:#6b9cf4}button.primary:hover:not(:disabled){background:#5d8ee1}button.secondary{background:#29394c;border-color:#405771}button.secondary:hover:not(:disabled){background:#36506d}
+input[type=password],textarea{font-family:inherit;width:100%;background:#111925;border:1px solid #425570;border-radius:9px;color:#f5f8ff;padding:12px;font-size:14px;outline:none}input:focus,textarea:focus{border-color:#78a7f0}textarea{min-height:105px;resize:vertical;line-height:1.55}
+small{font-size:12px;color:var(--muted)}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row.space{justify-content:space-between}.field{margin-top:14px}.field>label{font-weight:750;display:block;margin-bottom:8px}.upload{display:inline-flex;gap:8px;align-items:center;background:#334d70}#file{display:none}#fileLabel{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#acc1df;margin-top:7px}
+.steps{margin:0 0 16px;color:#b4c8e1;font-size:13px}h3{font-size:14px;margin:20px 0 10px}.styles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.style{display:flex;flex-direction:column;gap:11px;text-align:left;align-items:stretch;padding:11px 9px;min-width:0;background:#263243;border:2px solid #3a4d64;border-radius:11px}.style.active{border-color:#8fb7ff;background:#304561}.sample{display:block;padding:14px 2px;text-align:center;border-radius:6px;background:#42464a;color:#fff;font-weight:950;text-shadow:-1px -1px black,1px -1px black,-1px 1px black,1px 1px black;font-size:12px;white-space:nowrap;letter-spacing:-.3px}.sample span{padding:3px 4px}.style:nth-child(1) .sample span{background:#c4383b}.style:nth-child(2) .sample span{background:#196cd9}.style:nth-child(3) .sample span{background:#f5d340;color:#151515;text-shadow:none}.style-name{text-align:center;font-size:11px;font-weight:800}
+.action{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.action button{min-height:57px}.status{margin-top:14px;min-height:42px;background:#121e2d;border:1px solid #35465b;padding:11px 13px;border-radius:10px;color:#c6d8f1;font-size:13px;overflow-wrap:anywhere}.status.good{border-color:#3d796c;color:#a9eed0}.status.bad{border-color:#975e5e;color:#ffc4c4}.status.busy{border-color:#608bd5;color:#c9dcff}
+#editPanel{margin-top:20px;padding-top:20px;border-top:1px solid #3c4b5b}#editPanel[hidden],#captionSamples[hidden]{display:none}.editing{display:grid;grid-template-columns:1fr auto;gap:9px;margin-top:10px}.timed{max-height:185px;overflow:auto;display:flex;align-content:start;align-items:center;flex-wrap:wrap;gap:7px;margin-top:10px;padding:10px;background:#111b29;border:1px solid #374a61;border-radius:9px}
+.worditem{border:1px solid #40566d;border-radius:7px;display:inline-flex;align-items:center;gap:4px;padding:3px 7px;background:#273951}.worditem input{min-width:15px;width:65px;max-width:160px;border:0;background:transparent;color:white;font-size:13px;outline:0;font-weight:bold}.worditem em{color:#9db4cd;font-size:10px;font-style:normal}.worditem:focus-within{border-color:#80aaff}
+.note{font-size:12px;color:#9fb1c5;margin-top:8px}
+.api-settings{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;padding:12px 13px;border:1px solid #40536c;border-radius:10px;background:#142134}
+.api-state{display:inline-flex;gap:7px;align-items:center;font-weight:800;font-size:13px;color:#c2d0e0;flex:1;min-width:155px}
+.api-state::before{content:"";width:9px;height:9px;border-radius:50%;background:#8090a5;box-shadow:0 0 0 3px #53657922}
+.api-state.connected{color:#b4f4d3}.api-state.connected::before{background:#44d09b;box-shadow:0 0 0 3px #44d09b29}
+.api-settings button{padding:8px 11px;font-size:12px}
+.api-modal[hidden]{display:none}.api-modal{position:fixed;inset:0;background:#060c17db;z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(7px)}
+.api-dialog{width:min(100%,480px);background:linear-gradient(145deg,#202f43,#172231);border:1px solid #6586ad;box-shadow:0 25px 100px #000b;border-radius:19px;padding:27px}
+.api-dialog h2{font-size:21px;margin:0 0 8px}.api-dialog p{color:#b8cbe4;margin:0 0 18px;font-size:14px;line-height:1.6}
+.api-dialog label{display:block;font-weight:800;margin-bottom:8px}
+.api-dialog .api-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.api-dialog .api-feedback{min-height:23px;font-size:13px;color:#a8bdd6;margin-top:10px;overflow-wrap:anywhere}
+.api-dialog .api-feedback.error{color:#ffb9b9}.api-dialog .api-feedback.success{color:#a8eed0}
+.api-dialog .api-tip{font-size:12px;color:#8fa5bf;margin-top:14px}
+.drag-controls{margin-top:11px;gap:8px}.drag-controls .drag-hint{font-size:12px;color:#a6c7f8;flex:1;min-width:180px}.drag-controls button{font-size:12px;padding:6px 10px;border-radius:8px;min-width:auto}.column{display:flex;flex-direction:column;gap:20px}.footer{text-align:center;font-size:12px;color:#8397b4;padding:0 15px 24px}
+@media(max-width:920px){.wrap.main{display:flex;flex-direction:column}.preview{min-height:260px}.panel{width:100%}}@media(max-width:480px){header .wrap{padding:17px}.wrap.main{padding:0 12px}.pad{padding:15px}.brand{font-size:16px}.styles{gap:5px}.style{padding:9px 5px}.sample{font-size:10px}.action{grid-template-columns:1fr}.editing{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="brand">PALINDROM <b>CAPTIONS</b></div><div class="tag">Slovenské AI titulky</div></div></header>
+<main class="wrap main">
+  <section class="panel">
+    <div class="preview">
+      <canvas id="canvas" width="720" height="405" aria-label="Náhľad videa s titulkami"></canvas>
+      <video id="media" playsinline preload="auto"></video>
+      <div class="empty" id="empty"><div style="font-size:48px">▶</div><strong>Najprv vlož video</strong>Z Fotiek alebo Súborov · MOV · MP4</div>
+    </div>
+    <div class="pad">
+      <div class="row space"><h2 style="margin:0">Náhľad a prehrávanie</h2><small id="durationLabel">Bez videa</small></div>
+      <div class="controls"><button id="play" class="secondary" disabled>▶ Play</button><input aria-label="Posun vo videu" id="seek" type="range" value="0" min="0" max="1000" disabled><span id="clock">0:00 / 0:00</span></div>
+      <div class="row space drag-controls"><span class="drag-hint" id="dragHint">Po analýze chyť titulky prstom. Pri strede sa ukáže žltá os a text sa na ňu prichytí.</span><button id="resetPos" class="secondary" type="button" disabled>↺ Pôvodná poloha</button></div>
+      <p class="note">Obdĺžnik automaticky sleduje hovorené slovo. Umiestnenie textu sa zachová aj v exportovanom videu.</p>
+    </div>
+  </section>
+  <section class="column">
+    <section class="panel pad">
+      <h2>1 · Video a Groq</h2>
+      <p class="steps">Zvuk z videa sa pripraví priamo v telefóne; do Groq sa odosiela iba zvuk, nie video.</p>
+      <label for="file" class="upload">＋ Vybrať video</label><input id="file" type="file" accept="video/*"><div id="fileLabel">Zatiaľ nevybrané</div>
+      <div class="api-settings">
+        <span class="api-state" id="apiState" role="status">Groq nepripojené</span>
+        <button class="secondary" type="button" id="editKey">Pripojiť API kľúč</button>
+      </div>
+      <small>API kľúč sa uloží len v tomto zariadení a posiela sa iba do Groq. <button type="button" class="link-btn" id="forgetKey" hidden>Odstrániť kľúč z telefónu</button></small>
+      <h3>2 · Vyber štýl</h3>
+      <div class="styles" role="group" aria-label="Štýl titulkov">
+        <button class="style active" data-style="red" aria-pressed="true"><span class="sample">VIDEO <span>NIE JE</span></span><span class="style-name">RED CLASSIC</span></button>
+        <button class="style" data-style="blue" aria-pressed="false"><span class="sample">VIDEO <span>NIE JE</span></span><span class="style-name">BLUE CLASSIC</span></button>
+        <button class="style" data-style="yellow" aria-pressed="false"><span class="sample">VIDEO <span>NIE JE</span></span><span class="style-name">VIRAL YELLOW</span></button>
+      </div>
+      <div class="action"><button id="analyze" class="primary" disabled>✨ Analyzovať reč</button><button id="export" disabled>↓ Exportovať video</button></div>
+      <div class="status" id="status" role="status" aria-live="polite">Pripoj Groq API, vyber video a klikni na analýzu.</div>
+      <div class="save-row" id="saveRow"><button class="primary" type="button" id="shareVideo">⇪ Uložiť do Fotiek</button><a class="upload" id="downloadVideo" href="#" download="PALINDROM_CAPTIONS.mp4">↓ Uložiť do Súborov</a></div>
+    </section>
+    <section class="panel pad" id="editPanel" hidden>
+      <h2>3 · Prepis a opravy</h2>
+      <div class="row space"><span id="info" class="micro"></span><small>Jednotlivé slová majú vlastný čas</small></div>
+      <div class="field"><label for="transcript">Úplný text</label><textarea id="transcript" spellcheck="true" placeholder="Tu bude prepísaný text..."></textarea></div>
+      <div class="editing"><button id="apply" class="secondary">Použiť opravený text</button><button id="restore" class="secondary">Vrátiť AI prepis</button></div>
+      <h3>Presná oprava jednotlivých slov</h3>
+      <div class="timed" id="timed"></div>
+      <p class="note">Ak opravíš len slovo, jeho pôvodné časovanie zostane zachované. Pri pridaní alebo zmazaní slov sa časy prerozdelia približne.</p>
+    </section>
+  </section>
+</main>
+<div class="api-modal" id="apiModal" hidden role="dialog" aria-modal="true" aria-labelledby="apiTitle">
+  <div class="api-dialog">
+    <h2 id="apiTitle">Pripojenie ku Groq</h2>
+    <p id="apiDescription">Vlož svoj API kľúč. Hneď po zadaní ho overím a po úspešnom spojení okno zmizne.</p>
+    <label for="key">Groq API kľúč</label>
+    <input id="key" type="password" placeholder="gsk_…" autocomplete="off" spellcheck="false" autocapitalize="off" aria-describedby="keyStatus" />
+    <div class="api-feedback" id="keyStatus" role="status" aria-live="polite">Čakám na vloženie kľúča…</div>
+    <div class="api-actions">
+      <button class="secondary" id="cancelKey" type="button">Neskôr</button>
+      <button class="primary" id="connectKey" type="button">Pripojiť</button>
+    </div>
+    <div class="api-tip">Kľúč sa uloží len v tomto zariadení. Zmeníš ho cez tlačidlo „Zmeniť API kľúč“. Kľúč nájdeš na console.groq.com → API Keys.</div>
+  </div>
+</div>
+<footer class="footer">PALINDROM AUDIO · Video zostáva v tvojom zariadení · Analýza reči využíva Groq Cloud</footer>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const ui = {media:$('media'),canvas:$('canvas'),empty:$('empty'),file:$('file'),fileLabel:$('fileLabel'),play:$('play'),seek:$('seek'),clock:$('clock'),key:$('key'),apiModal:$('apiModal'),apiState:$('apiState'),editKey:$('editKey'),cancelKey:$('cancelKey'),connectKey:$('connectKey'),keyStatus:$('keyStatus'),apiTitle:$('apiTitle'),apiDescription:$('apiDescription'),analyze:$('analyze'),export:$('export'),status:$('status'),edit:$('editPanel'),text:$('transcript'),timed:$('timed'),info:$('info'),apply:$('apply'),restore:$('restore'),durationLabel:$('durationLabel'),dragHint:$('dragHint'),resetPos:$('resetPos'),forgetKey:$('forgetKey'),saveRow:$('saveRow'),shareVideo:$('shareVideo'),downloadVideo:$('downloadVideo')};
+const ctx = ui.canvas.getContext('2d');
+let file=null, fileURL=null, words=[], originalWords=[], groups=[], style='red', busy=false, audioCtx=null, audioSource=null, audioDestination=null, abortRequested=false;
+let captionPosition={x:.5,y:.78},captionBounds=null,captionDrag=null;
+let keySaved=false,keyCheckBusy=false,keyCheckTimer=null,keyAttempt=0,keyVerifyController=null;
+let needsRender=true,groqKey='',exported=null,exportURL=null;
+const UA=navigator.userAgent,IS_IOS=/iPhone|iPad|iPod/.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+// Apple WebKit (iPhone, iPad, Safari) only records H.264/AAC into MP4, so a bare "video/mp4" is safe there.
+const APPLE_WEBKIT=IS_IOS||(/Safari/.test(UA)&&!/Chrome|Chromium|Edg|OPR/.test(UA));
+// Fast path limits: 10 min of 16 kHz mono WAV = 19.2 MB (under the 20 MB limit). Phones have less memory,
+// so very big files skip the in-memory decode and use the real-time path instead.
+const FAST_WAV_MAX_SEC=600,FAST_WAV_MAX_BYTES=(IS_IOS?300:600)*1024*1024,MAX_AUDIO=20*1024*1024;
+const GROQ='https://api.groq.com/openai/v1',KEY_STORE='palindrom.captions.groqKey';
+const storeGet=k=>{try{return localStorage.getItem(k)||''}catch(e){return ''}};
+const storeSet=(k,v)=>{try{v?localStorage.setItem(k,v):localStorage.removeItem(k);return true}catch(e){return false}};
+function groqError(status,data,fallback){
+  const detail=data&&data.error&&data.error.message;
+  if(status===401||status===403)return 'API kľúč je neplatný alebo nemá povolený prístup.';
+  if(status===429)return 'Groq obmedzil požiadavky. Skús o chvíľu.';
+  if(status===413)return 'Zvuk je pre Groq priveľký. Použi kratšie video.';
+  return detail?('Groq API: '+String(detail).slice(0,300)):(fallback+' (HTTP '+status+')');
+}
+async function groqFetch(path,options,timeoutMs){
+  const ctl=new AbortController(),outer=options.signal,timer=setTimeout(()=>ctl.abort(),timeoutMs);
+  if(outer)outer.addEventListener('abort',()=>ctl.abort(),{once:true});
+  try{return await fetch(GROQ+path,{...options,signal:ctl.signal,cache:'no-store'})}
+  catch(e){
+    if(outer&&outer.aborted)throw e;
+    if(ctl.signal.aborted)throw Error('Groq neodpovedal včas. Skús to znova.');
+    throw Error('Spojenie s Groq zlyhalo. Skontroluj internet.');
+  }finally{clearTimeout(timer)}
+}
+async function verifyGroqKey(key,signal){
+  const r=await groqFetch('/models',{headers:{Authorization:'Bearer '+key},signal},18000);
+  if(!r.ok){const data=await r.json().catch(()=>null);throw Error(groqError(r.status,data,'Groq nepotvrdil spojenie'))}
+}
+const num=v=>{const n=Number(v);return isFinite(n)?n:0};
+async function groqTranscribe(blob,mime){
+  const ext=mime==='audio/wav'?'wav':(mime==='audio/mp4'?'m4a':'webm');
+  const form=new FormData();
+  form.append('model','whisper-large-v3');form.append('language','sk');
+  form.append('response_format','verbose_json');form.append('timestamp_granularities[]','word');
+  form.append('file',blob,'speech.'+ext);
+  const r=await groqFetch('/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+groqKey},body:form},180000);
+  const data=await r.json().catch(()=>null);
+  if(!r.ok){if(r.status===401){groqKey='';keySaved=false;storeSet(KEY_STORE,'');updateApiState()}throw Error(groqError(r.status,data,'Analýza zlyhala'))}
+  if(!data||typeof data!=='object')throw Error('Groq vrátil neplatnú odpoveď.');
+  const out=[];
+  for(const item of (Array.isArray(data.words)?data.words:[])){
+    const word=String((item&&item.word)||'').trim();if(!word)continue;
+    const start=Math.max(0,num(item.start)),end=Math.max(start,num(item.end));out.push({word,start,end});
+  }
+  if(!out.length)throw Error('Groq nevrátil časovanie slov. Skús kratšie video s hovorenou rečou.');
+  return out;
+}
+// Keeps the screen on during long real-time work (iOS 16.4+); silently ignored elsewhere.
+async function keepAwake(){try{if(navigator.wakeLock)return await navigator.wakeLock.request('screen')}catch(e){}return null}
+const theme = {red:{bg:'rgba(192,44,51,.83)',fg:'#FFFFFF'},blue:{bg:'rgba(27,104,226,.86)',fg:'#FFFFFF'},yellow:{bg:'rgba(247,213,51,.97)',fg:'#10131A'}};
+const secFormat = n => {n=Math.max(0,Math.floor(n||0));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0')};
+function message(s,kind=''){ui.status.textContent=s;ui.status.className='status '+kind}
+function buttons(){ui.play.disabled=!file||busy;ui.seek.disabled=!file||busy;ui.analyze.disabled=!file||busy||!keySaved;ui.editKey.disabled=busy;ui.export.disabled=!file||!words.length||busy;ui.file.disabled=busy;ui.apply.disabled=busy;ui.restore.disabled=busy;ui.resetPos.disabled=!file||!words.length||busy;}
+function setBusy(flag){busy=flag;buttons()}
+function onVideoMeta(){
+  const v=ui.media;const sw=v.videoWidth||720,sh=v.videoHeight||405;
+  const scale=Math.min(1,1920/Math.max(sw,sh),1080/Math.min(sw,sh));
+  ui.canvas.width=Math.max(240,Math.round(sw*scale));ui.canvas.height=Math.max(240,Math.round(sh*scale));
+  captionPosition={x:.5,y:sw>sh?.78:.70};captionBounds=null;
+  ui.empty.style.display='none';ui.durationLabel.textContent=secFormat(v.duration);ui.clock.textContent='0:00 / '+secFormat(v.duration);buttons();render();
+}
+function setFile(f){
+  if(!f)return;
+  clearExport();
+  if(fileURL)URL.revokeObjectURL(fileURL);file=f;fileURL=URL.createObjectURL(f);
+  words=[];originalWords=[];groups=[];captionBounds=null;captionDrag=null;ui.canvas.style.cursor='default';ui.dragHint.textContent='Po analýze chyť titulky prstom. Pri strede sa ukáže žltá os a text sa na ňu prichytí.';ui.edit.hidden=true;ui.fileLabel.textContent=f.name+' · '+(f.size/1024/1024).toFixed(1)+' MB';
+  ui.media.pause();ui.media.src=fileURL;ui.media.load();
+  message(keySaved?'Video načítané. Teraz klikni na Analyzovať reč.':'Video načítané. Najprv pripoj Groq API kľúč.');buttons();
+}
+// Reset the input so that choosing the same file again also triggers "change".
+ui.file.addEventListener('change',()=>{const f=ui.file.files[0];ui.file.value='';setFile(f)});
+ui.media.addEventListener('loadedmetadata',onVideoMeta);
+ui.media.addEventListener('loadeddata',requestRender);ui.media.addEventListener('seeked',requestRender);
+ui.media.addEventListener('error',()=>message('Toto video sa v prehliadači nedá prehrať. Skús MP4 alebo MOV z Fotiek.','bad'));
+ui.media.addEventListener('timeupdate',()=>{if(!ui.media.duration)return;ui.seek.value=String(Math.round(1000*ui.media.currentTime/ui.media.duration));ui.clock.textContent=secFormat(ui.media.currentTime)+' / '+secFormat(ui.media.duration)});
+ui.media.addEventListener('play',()=>{ui.play.textContent='Ⅱ Pauza'});ui.media.addEventListener('pause',()=>{ui.play.textContent='▶ Play'});
+ui.seek.addEventListener('input',()=>{if(ui.media.duration&&isFinite(ui.media.duration)){ui.media.currentTime=(Number(ui.seek.value)/1000)*ui.media.duration;render()}});
+function updateApiState(){
+  ui.apiState.textContent=keySaved?'Groq pripojené':'Groq nepripojené';
+  ui.apiState.classList.toggle('connected',!!keySaved);
+  ui.editKey.textContent=keySaved?'Zmeniť API kľúč':'Pripojiť API kľúč';
+  ui.forgetKey.hidden=!keySaved;
+  buttons();
+}
+function showKeyDialog(){
+  keyAttempt++;
+  clearTimeout(keyCheckTimer);if(keyVerifyController)keyVerifyController.abort();
+  ui.key.value='';ui.key.disabled=false;keyCheckBusy=false;ui.connectKey.disabled=false;
+  ui.apiTitle.textContent=keySaved?'Zmeniť API kľúč':'Pripojenie ku Groq';
+  ui.apiDescription.textContent=keySaved?'Vlož nový API kľúč. Pôvodný zostane aktívny, kým sa nový úspešne neoverí.':'Vlož svoj API kľúč. Po zadaní ho overím, uložím v tomto zariadení a toto okno sa zavrie.';
+  ui.keyStatus.textContent='Čakám na vloženie kľúča…';ui.keyStatus.className='api-feedback';
+  ui.apiModal.hidden=false;ui.cancelKey.textContent=keySaved?'Zrušiť':'Neskôr';
+  ui.key.focus();
+}
+function hideKeyDialog(){
+  keyAttempt++;clearTimeout(keyCheckTimer);if(keyVerifyController)keyVerifyController.abort();ui.apiModal.hidden=true;ui.key.value='';ui.key.blur();
+}
+async function connectKey(){
+  if(keyCheckBusy||ui.apiModal.hidden)return;
+  const candidate=ui.key.value.trim();
+  if(!candidate.startsWith('gsk_')||candidate.length<20){ui.keyStatus.textContent='Vlož celý Groq kľúč začínajúci gsk_.';ui.keyStatus.className='api-feedback error';return}
+  const id=++keyAttempt;keyCheckBusy=true;ui.connectKey.disabled=true;keyVerifyController=new AbortController();
+  ui.keyStatus.className='api-feedback';ui.keyStatus.textContent='Overujem kľúč a pripájam ku Groq…';
+  try{
+    if(!/^gsk_[A-Za-z0-9_-]{16,300}$/.test(candidate))throw Error('Kľúč obsahuje nepovolené znaky. Skopíruj ho znova z Groq konzoly.');
+    await verifyGroqKey(candidate,keyVerifyController.signal);
+    if(id!==keyAttempt)return;
+    groqKey=candidate;keySaved=true;const stored=storeSet(KEY_STORE,candidate);hideKeyDialog();updateApiState();
+    message((file?'Groq je pripojené. Môžeš analyzovať video.':'Groq je pripojené. Teraz vlož video.')+(stored?'':' (Kľúč sa nepodarilo uložiť natrvalo – po zatvorení ho zadáš znova.)'),'good');
+  }catch(e){if(id===keyAttempt){ui.keyStatus.textContent=e.message;ui.keyStatus.className='api-feedback error'}}
+  finally{if(id===keyAttempt){keyCheckBusy=false;ui.connectKey.disabled=false;keyVerifyController=null}}
+}
+ui.editKey.addEventListener('click',showKeyDialog);
+ui.cancelKey.addEventListener('click',hideKeyDialog);
+ui.connectKey.addEventListener('click',connectKey);
+ui.key.addEventListener('input',()=>{
+  clearTimeout(keyCheckTimer);
+  keyAttempt++;if(keyVerifyController)keyVerifyController.abort();keyCheckBusy=false;ui.connectKey.disabled=false;ui.keyStatus.className='api-feedback';ui.keyStatus.textContent='Čakám na úplný kľúč…';
+  const value=ui.key.value.trim();
+  if(value.startsWith('gsk_')&&value.length>=20){keyCheckTimer=setTimeout(connectKey,450)}
+});
+ui.key.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();clearTimeout(keyCheckTimer);connectKey()}});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&!ui.apiModal.hidden){hideKeyDialog()}});
+
+async function audioGraph(){
+  if(!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)();audioSource=audioCtx.createMediaElementSource(ui.media);audioDestination=audioCtx.createMediaStreamDestination();audioSource.connect(audioCtx.destination);audioSource.connect(audioDestination);}
+  if(audioCtx.state==='suspended')await audioCtx.resume();
+}
+ui.play.addEventListener('click',async()=>{try{if(ui.media.paused){await audioGraph();await ui.media.play()}else{ui.media.pause()}}catch(e){message('Prehrávanie zlyhalo: '+e.message,'bad')}});
+document.querySelectorAll('.style').forEach(btn=>btn.addEventListener('click',()=>{style=btn.dataset.style;document.querySelectorAll('.style').forEach(x=>{x.classList.toggle('active',x===btn);x.setAttribute('aria-pressed',x===btn?'true':'false')});render()}));
+// Fast path: decode audio from the selected container, resample to 16 kHz mono and upload a tiny WAV.
+async function fastWav(){
+  // Check length/size first so long or huge videos never get loaded into memory.
+  const d=ui.media.duration;
+  if(isFinite(d)&&d>FAST_WAV_MAX_SEC)throw Error('Video je pridlhé na rýchlu cestu.');
+  if(file.size>FAST_WAV_MAX_BYTES)throw Error('Súbor je priveľký na rýchlu cestu.');
+  let raw=await file.arrayBuffer();const decoded=await audioCtx.decodeAudioData(raw);raw=null;
+  if(!isFinite(decoded.duration)||decoded.duration<=0||decoded.duration>FAST_WAV_MAX_SEC)throw Error('Duration unsupported');
+  const sr=16000,frames=Math.ceil(decoded.duration*sr),off=new OfflineAudioContext(1,frames,sr);
+  const input=off.createBufferSource();input.buffer=decoded;input.connect(off.destination);input.start();
+  const b=await off.startRendering(),samples=b.getChannelData(0),buffer=new ArrayBuffer(44+samples.length*2),view=new DataView(buffer);
+  const ascii=(o,s)=>{for(let i=0;i<s.length;i++)view.setUint8(o+i,s.charCodeAt(i))};
+  ascii(0,'RIFF');view.setUint32(4,36+samples.length*2,true);ascii(8,'WAVE');ascii(12,'fmt ');view.setUint32(16,16,true);
+  view.setUint16(20,1,true);view.setUint16(22,1,true);view.setUint32(24,sr,true);view.setUint32(28,sr*2,true);view.setUint16(32,2,true);view.setUint16(34,16,true);ascii(36,'data');view.setUint32(40,samples.length*2,true);
+  for(let i=0;i<samples.length;i++){let v=Math.max(-1,Math.min(1,samples[i]));view.setInt16(44+i*2,v<0?v*32768:v*32767,true)}
+  return {blob:new Blob([buffer],{type:'audio/wav'}),mime:'audio/wav'};
+}
+const waitSeek=async t=>{if(Math.abs(ui.media.currentTime-t)<.03)return;await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{ui.media.removeEventListener('seeked',ok);reject(Error('Video sa nedá posunúť.'))},12000);function ok(){clearTimeout(timer);resolve()}ui.media.addEventListener('seeked',ok,{once:true});ui.media.currentTime=t;})};
+// Plays the video to the end; never hangs: fails on error, unexpected pause or a 15 s stall.
+function playToEnd(){
+  return new Promise((resolve,reject)=>{
+    const v=ui.media;let last=-1,stillSince=performance.now(),timer=null,settled=false;
+    const finish=(err)=>{if(settled)return;settled=true;clearInterval(timer);v.removeEventListener('ended',onEnded);v.removeEventListener('pause',onPause);v.removeEventListener('error',onError);err?reject(err):resolve()};
+    const onEnded=()=>finish();
+    const onPause=()=>{if(!v.ended)finish(Error('Prehrávanie sa prerušilo. Skús to znova a nechaj kartu otvorenú v popredí.'))};
+    const onError=()=>finish(Error('Video sa nedá prehrať do konca.'));
+    v.addEventListener('ended',onEnded);v.addEventListener('pause',onPause);v.addEventListener('error',onError);
+    timer=setInterval(()=>{
+      if(v.ended)return finish();
+      if(Math.abs(v.currentTime-last)>.01){last=v.currentTime;stillSince=performance.now();return}
+      if(performance.now()-stillSince>15000)finish(Error('Prehrávanie sa zaseklo. Skontroluj video a skús to znova.'));
+    },1000);
+    v.play().catch(e=>finish(Error('Prehrávanie sa nepodarilo spustiť: '+e.message)));
+  });
+}
+async function realtimeAudio(){
+  if(!window.MediaRecorder)throw Error('Tento prehliadač nevie nahrávať zvuk.');
+  // iPhone records AAC in MP4 (m4a); Chrome/Firefox record Opus in WEBM. Groq accepts both.
+  const mime=['audio/webm;codecs=opus','audio/webm','audio/mp4;codecs=mp4a.40.2','audio/mp4'].find(s=>MediaRecorder.isTypeSupported(s));
+  if(!mime)throw Error('Tento prehliadač nevie nahrávať zvuk.');
+  ui.media.pause();await waitSeek(0);await audioGraph();
+  const chunks=[];const rec=new MediaRecorder(audioDestination.stream,{mimeType:mime,audioBitsPerSecond:64000});
+  const done=new Promise((resolve,reject)=>{rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};rec.onerror=e=>reject(Error('Zvuk sa nepodarilo nahrať.'));rec.onstop=()=>resolve()});
+  const lock=await keepAwake();
+  rec.start(300);
+  try{
+    message('Pripravujem zvuk z videa… Počkaj približne '+secFormat(ui.media.duration)+'. Nechaj obrazovku zapnutú.','busy');
+    await playToEnd();
+  }finally{
+    ui.media.pause();if(rec.state!=='inactive')rec.stop();try{if(lock)await lock.release()}catch(e){}await done;
+  }
+  if(!chunks.length)throw Error('Zo záznamu sa nepodarilo získať zvuk.');
+  const base=(rec.mimeType||mime).split(';')[0];const type=base.startsWith('audio/mp4')?'audio/mp4':'audio/webm';
+  const blob=new Blob(chunks,{type});return {blob,mime:type};
+}
+function generateGroups(){
+  groups=[];let group=[],chars=0;
+  words.forEach((w,i)=>{
+    const wd=w.word||'';if(group.length>=5||chars+wd.length>32){if(group.length)groups.push(group);group=[];chars=0}
+    group.push(i);chars+=wd.length+1;
+    if(/[.!?]$/.test(wd)&&group.length>=2){groups.push(group);group=[];chars=0}
+  });if(group.length)groups.push(group);
+}
+function buildTimed(){
+  ui.timed.replaceChildren();const frag=document.createDocumentFragment();
+  words.forEach((item,i)=>{
+    const wrap=document.createElement('label');wrap.className='worditem';const inp=document.createElement('input');inp.value=item.word;inp.style.width=Math.max(36,Math.min(150,(item.word.length+1)*8))+'px';inp.setAttribute('aria-label','Slovo '+(i+1));
+    inp.addEventListener('change',()=>{
+      const value=inp.value.trim().replace(/\s+/gu,' ');
+      if(!value){
+        // An emptied word is removed instead of leaving an empty highlighted box.
+        if(words.length<=1){inp.value=item.word;return message('Posledné slovo sa nedá zmazať.','bad')}
+        const at=words.indexOf(item);if(at>=0)words.splice(at,1);
+        showTranscript();message('Slovo „'+item.word+'“ bolo odstránené.','good');return;
+      }
+      item.word=value;inp.value=value;ui.text.value=words.map(w=>w.word).join(' ');generateGroups();render();
+    });
+    const t=document.createElement('em');t.textContent=item.start.toFixed(1)+'s';wrap.append(inp,t);frag.append(wrap);
+  });ui.timed.append(frag);
+}
+function showTranscript(){ui.edit.hidden=false;ui.dragHint.textContent='Chyť viditeľné titulky v náhľade a presuň ich prstom. (Video môžeš pozastaviť.)';ui.text.value=words.map(w=>w.word).join(' ');ui.info.textContent=words.length+' slov · '+secFormat(ui.media.duration)+' video';generateGroups();buildTimed();buttons();render()}
+ui.apply.addEventListener('click',()=>{
+  if(!words.length)return;
+  const tokens=ui.text.value.trim().split(/\s+/u).filter(Boolean);if(!tokens.length)return message('Text nemôže byť prázdny.','bad');
+  const same=tokens.length===words.length;
+  if(same){words.forEach((w,i)=>w.word=tokens[i])}
+  else{
+    const previous=words;const start=previous[0].start,end=previous[previous.length-1].end;
+    words=tokens.map((word,i)=>{const a=start+(end-start)*(i/tokens.length),b=start+(end-start)*((i+1)/tokens.length);return {word,start:a,end:b}});
+  }
+  showTranscript();message(same?'Opravy uložené. Časovanie slov zostalo zachované.':'Text upravený. Počet slov sa zmenil, preto je časovanie orientačné.','good');
+});
+ui.restore.addEventListener('click',()=>{words=originalWords.map(x=>({...x}));showTranscript();message('Obnovený pôvodný AI prepis.','good')});
+ui.analyze.addEventListener('click',async()=>{
+  if(!file||busy)return;setBusy(true);ui.media.pause();
+  try{
+    await audioGraph();let audio;
+    try{message('Spracúvam zvuk priamo v zariadení…','busy');audio=await fastWav()}catch(e){audio=await realtimeAudio()}
+    if(audio.blob.size<100)throw Error('Z videa sa nepodarilo získať zvuk.');
+    if(audio.blob.size>MAX_AUDIO)throw Error('Zvuk má viac ako 20 MB. Použi kratšie video.');
+    message('Posielam len zvuk ('+(audio.blob.size/1024/1024).toFixed(2)+' MB) do Groq. Čakám na titulky…','busy');
+    words=await groqTranscribe(audio.blob,audio.mime);
+    originalWords=words.map(x=>({...x}));showTranscript();
+    if(ui.media.duration&&words[0].start>=0)ui.media.currentTime=Math.min(ui.media.duration,words[0].start+.07);
+    message('Hotovo. Rozpoznaných '+words.length+' slov. Oprav text, vyber štýl a exportuj.','good');
+  }catch(e){message('Analýza zlyhala: '+e.message,'bad')}
+  finally{ui.media.pause();setBusy(false);render()}
+});
+function roundedRect(x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function drawCaptions(t){
+  captionBounds=null;
+  const active=words.findIndex((w,i)=>t>=w.start-.06 && t<=w.end+.10 && (i===words.length-1 || t<words[i+1].start-.06));
+  let index=active;if(index<0){index=words.findIndex(w=>w.start>t&&w.start-t<.28);if(index<0)return}
+  const group=groups.find(g=>g.includes(index));if(!group)return;
+  const W=ui.canvas.width,H=ui.canvas.height,landscape=W>H,fs=Math.max(19,Math.round(Math.min(W*.066,H*(landscape?.103:.053),65)));
+  ctx.save();ctx.textBaseline='middle';ctx.font='900 '+fs+'px Arial, sans-serif';ctx.lineJoin='round';
+  const maxw=W*.91,pad=fs*.20,space=fs*.24;
+  let lines=[[]],total=0;
+  for(const wi of group){const w=words[wi].word.toUpperCase(),width=ctx.measureText(w).width;
+    const current=lines[lines.length-1];if(current.length && total+width+space>maxw){lines.push([]);total=0}
+    lines[lines.length-1].push({i:wi,txt:w,width});total+=width+space;
+  }
+  const widths=lines.map(line=>line.reduce((a,x)=>a+x.width,0)+Math.max(0,line.length-1)*space);
+  const widest=Math.max(...widths),lineh=fs*1.32;
+  const halfWidth=widest/2+pad+4,halfHeight=((lines.length-1)*lineh+fs*1.35)/2;
+  // Keep all visible text inside the actual video, regardless of its aspect ratio.
+  const centerX=Math.max(halfWidth,Math.min(W-halfWidth,captionPosition.x*W));
+  const centerY=Math.max(halfHeight,Math.min(H-halfHeight,captionPosition.y*H));
+  const startY=centerY-(lines.length-1)*lineh/2;
+  captionBounds={left:Math.max(0,centerX-widest/2-pad-9),top:Math.max(0,centerY-halfHeight-9),right:Math.min(W,centerX+widest/2+pad+9),bottom:Math.min(H,centerY+halfHeight+9)};
+  lines.forEach((line,j)=>{
+    const totalWidth=widths[j];let x=centerX-totalWidth/2,y=startY+j*lineh;
+    line.forEach(item=>{
+      const current=item.i===active;
+      if(current){ctx.fillStyle=theme[style].bg;roundedRect(x-pad,y-fs*.63,item.width+pad*2,fs*1.27,fs*.09);ctx.fill()}
+      ctx.strokeStyle='rgba(0,0,0,.96)';ctx.lineWidth=Math.max(3,fs*.105);ctx.shadowColor='rgba(0,0,0,.65)';ctx.shadowBlur=fs*.12;
+      if(!(current&&style==='yellow'))ctx.strokeText(item.txt,x,y);
+      ctx.shadowBlur=0;ctx.fillStyle=current?theme[style].fg:'#fff';ctx.fillText(item.txt,x,y);
+      x+=item.width+space;
+    });
+  });ctx.restore();
+}
+// Canvas pointer events provide the same position for preview and exported frames.
+function canvasPoint(ev){
+  const rect=ui.canvas.getBoundingClientRect();
+  return {x:(ev.clientX-rect.left)*ui.canvas.width/rect.width,y:(ev.clientY-rect.top)*ui.canvas.height/rect.height};
+}
+function onCaption(point){const b=captionBounds;return !!b&&point.x>=b.left&&point.x<=b.right&&point.y>=b.top&&point.y<=b.bottom}
+ui.canvas.addEventListener('pointerdown',ev=>{
+  if(ev.button!==0||!file||!words.length||busy||!onCaption(canvasPoint(ev)))return;
+  ev.preventDefault();ui.media.pause();
+  const p=canvasPoint(ev);
+  captionDrag={id:ev.pointerId,x:p.x,y:p.y,startX:captionPosition.x,startY:captionPosition.y,snappedX:Math.abs(captionPosition.x-.5)<.00001};
+  ui.canvas.setPointerCapture(ev.pointerId);ui.canvas.style.cursor='grabbing';
+  ui.dragHint.textContent='Presuň titulky a pusti ich. Nová poloha sa použije aj pri exporte.';
+});
+ui.canvas.addEventListener('pointermove',ev=>{
+  const p=canvasPoint(ev);
+  if(captionDrag&&captionDrag.id===ev.pointerId){
+    ev.preventDefault();
+    const draggedX=Math.max(0,Math.min(1,captionDrag.startX+(p.x-captionDrag.x)/ui.canvas.width));
+    // Snap the *text centre* to the video's vertical midline, with a small magnetic zone.
+    captionDrag.snappedX=Math.abs(draggedX-.5)<=.025;
+    captionPosition.x=captionDrag.snappedX?.5:draggedX;
+    captionPosition.y=Math.max(0,Math.min(1,captionDrag.startY+(p.y-captionDrag.y)/ui.canvas.height));
+    if(captionDrag.snappedX)ui.dragHint.textContent='● STRED – titulky sú presne vycentrované na žltej osi.';
+    else ui.dragHint.textContent='Presúvaj titulky. Pri strede sa automaticky prichytia na žltú os.';
+    render();return;
+  }
+  ui.canvas.style.cursor=!busy&&onCaption(p)?'grab':'default';
+});
+function endCaptionDrag(ev){
+  if(!captionDrag||captionDrag.id!==ev.pointerId)return;
+  captionDrag=null;
+  if(ui.canvas.hasPointerCapture(ev.pointerId))ui.canvas.releasePointerCapture(ev.pointerId);
+  ui.canvas.style.cursor=onCaption(canvasPoint(ev))?'grab':'default';
+  ui.dragHint.textContent='Poloha uložená pre celé video aj export. Ak chceš, môžeš text presunúť znova.';
+}
+ui.canvas.addEventListener('pointerup',endCaptionDrag);
+ui.canvas.addEventListener('pointercancel',endCaptionDrag);
+ui.canvas.addEventListener('pointerleave',()=>{if(!captionDrag)ui.canvas.style.cursor='default'});
+ui.resetPos.addEventListener('click',()=>{
+  captionPosition={x:.5,y:ui.canvas.width>ui.canvas.height?.78:.70};
+  ui.dragHint.textContent='Poloha titulkov obnovená. Chyť ich prstom a môžeš ich opäť posunúť.';
+  render();
+});
+function drawCenterGuide(){
+  if(!captionDrag||!captionDrag.snappedX)return;
+  const W=ui.canvas.width,H=ui.canvas.height;
+  ctx.save();
+  const x=Math.round(W/2)+.5;
+  ctx.strokeStyle='#ffdc23';ctx.lineWidth=Math.max(2,Math.round(W/640*2));
+  ctx.shadowColor='#ffdb13';ctx.shadowBlur=9;
+  ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();
+  ctx.shadowBlur=0;
+  const size=Math.max(13,Math.round(Math.min(W,H)*.034));
+  ctx.font='900 '+size+'px Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  const text='STRED',textWidth=ctx.measureText(text).width;
+  ctx.fillStyle='#ffdc23';roundedRect(W/2-textWidth/2-11,9,textWidth+22,size+14,5);ctx.fill();
+  ctx.fillStyle='#111924';ctx.fillText(text,W/2,9+(size+14)/2);
+  ctx.restore();
+}
+function render(){
+  const W=ui.canvas.width,H=ui.canvas.height;ctx.clearRect(0,0,W,H);ctx.fillStyle='#090e17';ctx.fillRect(0,0,W,H);
+  if(file&&ui.media.readyState>=2){try{ctx.drawImage(ui.media,0,0,W,H)}catch(e){}}
+  if(words.length)drawCaptions(ui.media.currentTime);
+  drawCenterGuide();
+}
+// Redraw only while the video plays, during dragging, or after a change (saves battery and CPU).
+function requestRender(){needsRender=true}
+function frame(){if(needsRender||!ui.media.paused||captionDrag){needsRender=false;render()}requestAnimationFrame(frame)}requestAnimationFrame(frame);
+async function exportVideo(){
+  if(!words.length||!file)return;
+  if(!ui.canvas.captureStream||!window.MediaRecorder)throw Error('Tento prehliadač nepodporuje export. Použi Safari (iPhone) alebo Chrome.');
+  clearExport();
+  captionDrag=null;ui.canvas.style.cursor='default';await audioGraph();ui.media.pause();await waitSeek(0);render();
+  const vid=ui.canvas.captureStream(30);const combined=new MediaStream([...vid.getVideoTracks(),...audioDestination.stream.getAudioTracks()]);
+  // Real MP4 only with H.264 + AAC (plays in Photos, QuickTime, CapCut). On Apple WebKit a bare "video/mp4"
+  // is always H.264/AAC; elsewhere it could hide VP9/Opus, so other browsers fall back to honest WEBM.
+  const types=['video/mp4;codecs=avc1.640028,mp4a.40.2','video/mp4;codecs=avc1.4d0028,mp4a.40.2','video/mp4;codecs=avc1.42E01F,mp4a.40.2','video/mp4;codecs=avc1.42E01E,mp4a.40.2'];
+  if(APPLE_WEBKIT)types.push('video/mp4');
+  types.push('video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm');
+  const pixels=ui.canvas.width*ui.canvas.height,videoBitsPerSecond=Math.round(Math.min(10e6,Math.max(3e6,pixels*30*.12)));
+  const chunks=[];let rec=null,mime='',lastError=null;
+  for(const type of types.filter(t=>MediaRecorder.isTypeSupported(t))){
+    try{rec=new MediaRecorder(combined,{mimeType:type,videoBitsPerSecond,audioBitsPerSecond:192000});mime=type;break}catch(e){lastError=e}
+  }
+  if(!rec){vid.getTracks().forEach(x=>x.stop());throw Error('Prehliadač neumožňuje nahrávať video'+(lastError?': '+lastError.message:'.'))}
+  const finished=new Promise((resolve,reject)=>{rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};rec.onerror=()=>reject(Error('Záznam videa zlyhal.'));rec.onstop=resolve});
+  const lock=await keepAwake();
+  rec.start(300);message('Exportujem video v reálnom čase ('+secFormat(ui.media.duration)+'). Nechaj obrazovku zapnutú a appku v popredí.','busy');
+  try{await playToEnd()}finally{ui.media.pause();if(rec.state!=='inactive')rec.stop();try{if(lock)await lock.release()}catch(e){}try{await finished}finally{vid.getTracks().forEach(x=>x.stop())}}
+  const actual=rec.mimeType||mime,extension=actual.startsWith('video/mp4')?'mp4':'webm',type=extension==='mp4'?'video/mp4':'video/webm';
+  const result=new Blob(chunks,{type});if(result.size<5000)throw Error('Export vytvoril prázdny súbor.');
+  const name='PALINDROM_CAPTIONS_'+new Date().toISOString().slice(0,19).replace(/[-:T]/g,'')+'.'+extension;
+  exported=new File([result],name,{type});exportURL=URL.createObjectURL(exported);
+  ui.downloadVideo.href=exportURL;ui.downloadVideo.download=name;
+  const canShare=!!(navigator.canShare&&navigator.share&&navigator.canShare({files:[exported]}));
+  const size=(result.size/1024/1024).toFixed(1)+' MB';
+  if(canShare){
+    // Sharing needs a fresh tap (the export took too long to count as one), so offer buttons.
+    ui.shareVideo.hidden=false;ui.saveRow.classList.add('show');
+    message('Hotovo – '+extension.toUpperCase()+' ('+size+'). Ťukni na „Uložiť do Fotiek“ a v ponuke vyber „Uložiť video“.','good');
+  }else{
+    ui.shareVideo.hidden=true;ui.saveRow.classList.add('show');
+    ui.downloadVideo.click();
+    message('Hotovo. Video uložené ako '+extension.toUpperCase()+' ('+size+').','good');
+  }
+}
+function clearExport(){
+  ui.saveRow.classList.remove('show');
+  if(exportURL){const old=exportURL;setTimeout(()=>URL.revokeObjectURL(old),1000)}
+  exported=null;exportURL=null;ui.downloadVideo.removeAttribute('href');
+}
+ui.shareVideo.addEventListener('click',async()=>{
+  if(!exported)return;
+  try{await navigator.share({files:[exported],title:'PALINDROM CAPTIONS'});message('Video odoslané / uložené.','good')}
+  catch(e){if(e&&e.name==='AbortError')return;message('Zdieľanie zlyhalo: '+e.message+' Skús „Uložiť do Súborov“.','bad')}
+});
+ui.export.addEventListener('click',async()=>{setBusy(true);try{await exportVideo()}catch(e){message('Export zlyhal: '+e.message,'bad')}finally{ui.media.pause();setBusy(false)}});
+ui.forgetKey.addEventListener('click',()=>{
+  if(!confirm('Odstrániť Groq API kľúč z tohto zariadenia?'))return;
+  groqKey='';keySaved=false;storeSet(KEY_STORE,'');updateApiState();message('Kľúč bol odstránený z tohto zariadenia.','good');
+});
+function loadSavedKey(){
+  groqKey=storeGet(KEY_STORE);keySaved=!!groqKey;updateApiState();
+  if(keySaved){message('Groq kľúč je uložený v tomto zariadení. Vyber video a môžeš pracovať.','good')}
+  else{ui.apiModal.hidden=false;ui.keyStatus.textContent='Vlož kľúč raz. Uložím ho v tomto zariadení.';setTimeout(()=>ui.key.focus(),50)}
+}
+updateApiState();buttons();render();loadSavedKey();
+</script>
+</body></html>
