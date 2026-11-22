@@ -1,0 +1,1698 @@
+<!doctype html>
+<html lang="sk" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="NOIR">
+<meta name="theme-color" content="#101317">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="NOIR — spúšťač webových appiek Hugging Face s odpočtom dennej ZeroGPU kvóty, výberom podľa toho, čo práve tvoríš, a prehľadom modelových súborov.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://huggingface.co; img-src 'self'; manifest-src 'self'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>NOIR 2.4 — Hugging Face / App Launcher</title>
+<style>
+:root{--bg:#0d0f12;--side:#101215;--panel:#16191e;--panel2:#1c2026;--text:#f0f2ed;--muted:#a4aab3;--subtle:#7f8894;--line:#2b3037;--accent:#c2ee86;--accent-ink:#1b2a0b;--cap:#eeb586;--image:#8cbdff;--video:#c5acf1;--t-describe:#eeb586;--t-t2i:#8cbdff;--t-edit:#e8d48b;--t-i2v:#c5acf1;--t-t2v:#f2a7c9;--t-s2v:#9fe0c6;--warn:#f0a36b;--radius:18px;--shadow:0 20px 70px #0007}
+:root[data-theme="light"]{--bg:#f4f5f0;--side:#fafbf7;--panel:#fff;--panel2:#eef0e9;--text:#1d241d;--muted:#60695f;--subtle:#717b70;--line:#d8dfd3;--accent:#456c22;--accent-ink:#fff;--cap:#945328;--image:#316faa;--video:#8252b1;--t-describe:#a3531f;--t-t2i:#2c68a3;--t-edit:#86680f;--t-i2v:#7a4cab;--t-t2v:#a83c6f;--t-s2v:#23775c;--warn:#a8501b;--shadow:0 20px 60px #18241322}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
+button,a{touch-action:manipulation}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer}
+button:disabled{cursor:wait;opacity:.6}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+[hidden]{display:none!important}
+h1,h2,h3,p{margin:0}
+button{color:inherit}
+.skip{position:fixed;top:-80px;left:20px;background:var(--accent);color:var(--accent-ink);padding:12px;z-index:200}
+.skip:focus{top:12px}
+.sidebar{position:fixed;inset:0 auto 0 0;width:248px;background:var(--side);border-right:1px solid var(--line);padding:30px 18px 20px;display:flex;flex-direction:column;z-index:20;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:12px;padding:0 10px}
+.brand-mark{width:31px;height:31px;border:2px solid var(--accent);border-radius:8px;transform:rotate(-9deg);position:relative}
+.brand-mark:before,.brand-mark:after{content:"";position:absolute;background:var(--accent);width:3px;height:15px;top:6px}
+.brand-mark:before{left:7px}.brand-mark:after{right:7px}
+.wordmark{font-size:27px;font-weight:760;letter-spacing:5px;line-height:1}
+.brand-sub{font-size:10px;letter-spacing:2.1px;color:var(--subtle);margin:13px 0 30px 11px}
+.nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1.8px;color:var(--subtle);padding:0 12px;margin:12px 0}.task-label{margin-top:26px}
+.nav-item{display:flex;align-items:center;gap:11px;border:0;background:none;color:var(--muted);padding:10px 12px;border-radius:9px;width:100%;text-align:left;margin-bottom:3px;font-size:13px;white-space:nowrap}
+.nav-item:hover{background:var(--panel2);color:var(--text)}
+.nav-item.active{background:var(--panel2);color:var(--accent)}
+.nav-icon{font-size:18px;width:22px;line-height:1;text-align:center}
+.nav-num{font-size:11px;font-variant-numeric:tabular-nums;margin-left:auto;border:1px solid var(--line);border-radius:5px;min-width:24px;text-align:center}.task-nav{display:flex;flex-direction:column}.task-item{display:flex;align-items:center;gap:11px;border:0;background:none;color:var(--muted);padding:7px 12px;border-radius:8px;width:100%;text-align:left;font-size:12px;white-space:nowrap}.task-item:hover{background:var(--panel2);color:var(--text)}.task-item.active{background:var(--panel2);color:var(--text)}.task-item.active .task-name{color:var(--tc)}.task-item.empty-task{opacity:.45}.task-dot{width:7px;height:7px;border-radius:50%;background:var(--tc,var(--subtle));flex:none}.task-count{margin-left:auto;font-size:10px;color:var(--subtle);font-variant-numeric:tabular-nums}.credit-card{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:13px;background:var(--panel);padding:15px 14px 13px;margin-top:22px;color:var(--text)}.credit-card:hover{border-color:var(--subtle)}.credit-head{display:flex;justify-content:space-between;align-items:center;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--subtle)}.credit-head b{font-weight:600;color:var(--accent);letter-spacing:.8px}.credit-num{display:flex;align-items:baseline;gap:7px;margin:9px 0 9px}.credit-num b{font-size:27px;font-weight:600;letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1}.credit-num span{font-size:11px;color:var(--muted)}.credit-bar{height:5px;border-radius:5px;background:var(--panel2);overflow:hidden}.credit-bar i{display:block;height:100%;background:var(--accent);border-radius:5px;transition:width .3s}.credit-card.low .credit-bar i,.credit-pill.low:before{background:var(--warn)}.credit-card.over .credit-num b,.credit-card.low .credit-num b{color:var(--warn)}.credit-meta{font-size:10px;color:var(--subtle);margin-top:8px;line-height:1.5}.credit-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:9px;background:transparent;padding:9px 12px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}.credit-pill:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}.credit-pill:hover{background:var(--panel2)}.credit-pill span{font-weight:400;color:var(--muted)}
+.side-bottom{margin-top:auto}
+.account-box{padding:16px 13px;border:1px solid var(--line);border-radius:12px;margin-top:26px;background:var(--panel)}
+.account-box p{color:var(--muted);font-size:11px;margin:7px 0 12px}
+.side-version{color:var(--subtle);font-size:10px;letter-spacing:.9px;margin:17px 10px 0}
+main{margin-left:248px;padding:0 40px 120px;max-width:1760px}
+.topbar{min-height:92px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:16px}
+.breadcrumb{font-size:11px;letter-spacing:1.5px;color:var(--subtle)}
+.breadcrumb b{color:var(--muted);font-weight:500}
+.top-actions{display:flex;gap:9px;align-items:center}
+.btn{display:inline-flex;justify-content:center;align-items:center;gap:9px;border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:10px 14px;font-size:12px;font-weight:600;line-height:1.4;white-space:nowrap;transition:background .15s,border .15s,transform .15s}
+.btn:hover{background:var(--panel2);border-color:var(--subtle)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent}
+.btn.small{padding:8px 11px;font-size:11px}
+.icon-btn{width:37px;height:37px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:9px;background:transparent;font-size:19px}
+.icon-btn:hover{background:var(--panel2)}
+.icon-btn.selected{color:var(--accent);border-color:var(--accent)}
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:48px;align-items:center;padding:44px 0 36px}
+.eyebrow{display:flex;align-items:center;gap:9px;color:var(--muted);letter-spacing:1.7px;font-size:10px;font-weight:600;text-transform:uppercase;margin-bottom:18px}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.pill18{border:1px solid var(--line);border-radius:5px;padding:2px 5px;color:var(--text);letter-spacing:0}
+h1{font-size:clamp(34px,4vw,54px);line-height:1.08;letter-spacing:-2.2px;font-weight:660}
+h1 span{color:var(--accent)}
+.hero-text{color:var(--muted);max-width:560px;line-height:1.8;margin-top:20px;font-size:13px}
+.hero-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.feature-panel{border:1px solid var(--line);background:var(--panel);border-radius:var(--radius);overflow:hidden}
+.feature-panel-head{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.micro{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+.feature-row{display:flex;gap:14px;align-items:center;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:16px 20px;text-align:left}
+.feature-row:last-child{border:0}
+.feature-row:hover{background:var(--panel2)}
+.feature-number{font-size:12px;font-family:monospace;opacity:.65}
+.feature-row div{flex:1;min-width:0}
+.feature-row strong{display:block;font-size:13px;font-weight:600}
+.feature-row small{font-size:10px;color:var(--muted)}
+.feature-row .arrow{color:var(--subtle);font-size:19px}
+.caption-color{color:var(--cap)}.image-color{color:var(--image)}.video-color{color:var(--video)}
+.summary-strip{display:flex;align-items:center;gap:20px;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:31px;flex-wrap:wrap}
+.summary-item{display:flex;align-items:baseline;gap:8px}
+.summary-item b{font-size:21px;font-weight:600;font-variant-numeric:tabular-nums}
+.summary-item span{font-size:11px;color:var(--muted)}
+.summary-meta{margin-left:auto;color:var(--subtle);font-size:10px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:16px}
+.section-head h2{font-size:20px;font-weight:550;letter-spacing:-.5px}
+.section-head p{font-size:11px;color:var(--muted)}
+.toolbar{display:flex;gap:11px;align-items:center;margin-bottom:16px}
+.search{position:relative;flex:1}
+.search span{position:absolute;top:10px;left:14px;color:var(--subtle);font-size:21px;line-height:1}
+.search input{width:100%;height:43px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 42px;color:var(--text)}
+.search kbd{position:absolute;right:14px;top:11px;color:var(--subtle);font-size:11px;border:1px solid var(--line);border-radius:4px;padding:0 5px}
+input::placeholder,textarea::placeholder{color:var(--subtle)}
+select{background:var(--panel);color:var(--text);padding:11px 30px 11px 12px;border:1px solid var(--line);border-radius:9px;font-size:12px;max-width:100%}
+.filter-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:23px}
+.chip{border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--muted);padding:7px 11px;font-size:11px;white-space:nowrap}
+.chip.active{color:var(--text);background:var(--panel2);border-color:var(--subtle)}
+.chip:hover{color:var(--text)}
+.result-count{margin-left:auto;font-size:10px;color:var(--subtle)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.card{display:flex;flex-direction:column;position:relative;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:20px;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--subtle);transform:translateY(-2px)}
+.card.comparing{border-color:var(--accent)}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+.category-label{font-size:9px;letter-spacing:1.1px;text-transform:uppercase;font-weight:650}
+.card .star{border:0;background:transparent;font-size:22px;padding:0 3px;color:var(--subtle);height:29px;line-height:1}
+.card .star.on{color:var(--accent)}
+.card h3{font-size:17px;font-weight:600;letter-spacing:-.3px;line-height:1.4;margin-bottom:5px}
+.repo-owner{font-size:10px;color:var(--subtle);margin-bottom:14px;overflow-wrap:anywhere}
+.card-desc{font-size:12px;color:var(--muted);line-height:1.75;flex:1;margin-bottom:16px;min-height:63px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:17px}
+.tag{font-size:9px;padding:3px 7px;border:1px solid var(--line);border-radius:5px;color:var(--muted)}
+.card-metrics{display:flex;align-items:flex-end;justify-content:space-between;border-top:1px solid var(--line);padding:13px 0;gap:5px}
+.metric-num{font-size:22px;font-weight:550;letter-spacing:-.7px;font-variant-numeric:tabular-nums;line-height:1.3}
+.metric-label{display:block;font-size:9px;color:var(--subtle);letter-spacing:.15px}
+.likes{color:var(--muted);font-size:11px;white-space:nowrap;padding-bottom:3px}
+.card-actions{display:flex;gap:7px;flex-wrap:wrap}
+.card-actions .btn:first-child{flex:1}
+.card-launch{display:flex;width:100%;margin:0 0 9px;white-space:normal;text-align:center}
+.card-link-hint{font-size:10px;color:var(--subtle);margin:0 0 12px;line-height:1.6}
+.card h3 a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+.compare-toggle{display:flex;gap:6px;align-items:center;font-size:10px;color:var(--muted);margin-top:14px;cursor:pointer;width:max-content;max-width:100%}
+input[type="checkbox"]{accent-color:var(--accent);cursor:pointer}
+.card-status{position:absolute;bottom:19px;right:20px;font-size:9px;color:var(--accent)}
+.disclosure{display:flex;gap:12px;color:var(--subtle);font-size:11px;line-height:1.8;margin-top:25px;padding:16px 0}
+.disclosure b{color:var(--muted);font-weight:500}
+.empty{grid-column:1/-1;padding:60px 20px;border:1px dashed var(--line);border-radius:16px;text-align:center}
+.empty h3{font-size:20px;font-weight:500;margin-bottom:10px}
+.empty p{color:var(--muted);font-size:12px;margin-bottom:20px}
+.dock{position:fixed;bottom:22px;left:calc(50% + 124px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:9px;z-index:40;width:max-content;max-width:calc(100% - 290px)}.compare-bar,.session-bar{display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--panel2);box-shadow:var(--shadow);border:1px solid var(--line);border-radius:14px;max-width:100%}.session-bar{flex-wrap:wrap;gap:10px 14px;border-color:var(--accent)}.session-bar.pulse{animation:pulse 1.4s ease 2}@keyframes pulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 30%,transparent)}}.session-info{font-size:12px;min-width:0}.session-info b{display:block;font-size:13px}.session-info span{color:var(--muted);font-size:11px}.session-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.compare-bar strong{font-size:12px;white-space:nowrap}
+.toast{position:fixed;bottom:26px;right:26px;padding:13px 18px;border:1px solid var(--line);background:var(--text);color:var(--bg);border-radius:10px;box-shadow:var(--shadow);z-index:110;font-size:12px;max-width:calc(100vw - 40px)}
+.overlay{position:fixed;inset:0;background:#030508ba;backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:25px;z-index:70}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:19px;width:680px;max-width:100%;max-height:90vh;overflow:auto;box-shadow:var(--shadow);padding:28px}
+.modal.wide{width:1120px}
+.modal-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:24px}
+.modal-top h2{font-size:23px;letter-spacing:-.6px;line-height:1.35}
+.modal-top p{color:var(--muted);font-size:11px;margin-top:5px;overflow-wrap:anywhere}
+.detail-intro{font-size:14px;color:var(--muted);margin-bottom:20px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.detail-box{background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:14px}
+.detail-box .micro{display:block;margin-bottom:7px;font-size:9px}
+.detail-box p{font-size:12px}
+.detail-section{border-top:1px solid var(--line);padding-top:18px;margin-top:20px}
+.detail-section h3{font-size:13px;font-weight:600;margin-bottom:8px}
+.detail-section p{font-size:12px;color:var(--muted);line-height:1.8}
+.source-links{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}
+.field{display:block;margin-top:14px;font-size:11px;color:var(--muted)}
+.field textarea{display:block;width:100%;resize:vertical;min-height:105px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);padding:12px;margin-top:7px;line-height:1.65}
+.field select{display:block;width:100%;margin-top:7px}
+.field input[type="password"]{display:block;width:100%;margin-top:8px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:13px;color:var(--text);font-family:monospace}
+.account-status{display:flex;align-items:center;gap:9px;font-size:11px;color:var(--muted);margin-bottom:18px}
+.account-status.connected{color:var(--accent)}
+.account-status .dot{background:currentColor}
+.account-profile{padding:20px;border:1px solid var(--line);background:var(--bg);border-radius:12px;margin-bottom:20px;overflow-wrap:anywhere}
+.account-profile strong{display:block;font-size:23px;letter-spacing:-.5px;margin-bottom:4px}
+.account-profile p{font-size:12px;color:var(--muted)}
+.account-steps{padding-left:20px;font-size:12px;color:var(--muted);line-height:1.85}
+.account-steps li{margin-bottom:7px}
+.account-steps a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.account-error{font-size:12px;color:var(--cap);margin-top:14px}
+.account-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.btn.account-connected{color:var(--accent);border-color:var(--accent);max-width:250px;overflow:hidden;text-overflow:ellipsis}
+.field-hint{font-size:10px;color:var(--subtle);margin-top:9px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;text-align:left;font-size:12px}
+th,td{padding:15px 12px;border-bottom:1px solid var(--line);vertical-align:top;min-width:180px}
+th{font-weight:550;color:var(--text)}
+td{color:var(--muted)}
+th:first-child,td:first-child{min-width:125px;width:145px;font-size:10px;color:var(--subtle)}
+.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.help-box{border:1px solid var(--line);border-radius:15px;background:var(--panel);padding:25px}
+.help-box h3{font-size:17px;margin-bottom:11px;font-weight:550}
+.help-box p{font-size:12px;color:var(--muted);line-height:1.85;margin-bottom:12px}
+.help-box p:last-child{margin-bottom:0}
+.help-box a{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+.notice{padding:12px 16px;border:1px solid var(--line);background:var(--panel2);border-radius:10px;font-size:11px;color:var(--muted);margin:18px 0}
+.account-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}
+.account-options a{padding:18px;white-space:normal;text-align:center}
+.backup-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.footer{font-size:10px;color:var(--subtle);display:flex;justify-content:space-between;gap:20px;border-top:1px solid var(--line);padding-top:24px;margin-top:35px}
+.mobile-brand{display:none;font-size:19px;letter-spacing:3px}
+.note-preview{margin:10px 0;padding:10px;background:var(--bg);border-radius:8px;color:var(--muted);font-size:11px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:88px;overflow:hidden}
+#refreshState{font-size:11px;color:var(--accent);margin:0 0 14px}
+#storageWarning{font-size:11px;border:1px solid var(--cap);border-radius:8px;padding:10px;color:var(--cap);margin:15px 0}
+.inline-link{border:0;padding:0;background:none;color:var(--accent);text-decoration:underline;text-underline-offset:3px}.launch-notice{margin:0 0 18px;line-height:1.8}.launch-notice strong{color:var(--text)}.runtime-badge{font-size:10px;color:var(--muted);display:inline-flex;gap:6px;align-items:center}.runtime-badge:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--subtle)}.runtime-badge.running{color:var(--accent)}.runtime-badge.running:before{background:var(--accent)}.runtime-badge.unavailable{color:var(--cap)}.runtime-badge.unavailable:before{background:var(--cap)}.card-version{font-size:10px;line-height:1.65;margin:-5px 0 12px;color:var(--muted)}.gpu-line{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--muted);margin:-4px 0 12px}.gpu-line:before{content:"";width:6px;height:6px;border-radius:2px;background:var(--subtle)}.gpu-line.zero:before{background:var(--accent)}.gpu-line.low{color:var(--warn)}.gpu-line.low:before{background:var(--warn)}.card-tasks{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}.card-task{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:var(--muted)}.card-task:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tc)}.btn.alt{border-style:dashed}.credit-log{list-style:none;padding:0;margin:10px 0 0;font-size:12px;color:var(--muted)}.credit-log li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}.credit-log b{color:var(--text);font-weight:500;font-variant-numeric:tabular-nums}.field input[type="number"],.field input[type="time"]{display:block;width:100%;margin-top:7px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px;color:var(--text)}.credit-big{display:flex;align-items:baseline;gap:10px;margin:4px 0 14px}.credit-big b{font-size:52px;font-weight:600;letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums}.credit-big.over b{color:var(--warn)}.credit-big span{color:var(--muted);font-size:12px}.key-block{border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;background:var(--bg)}.key-block h3{font-size:14px;font-weight:550;margin:0 0 8px}.key-block .account-steps b{color:var(--text);font-weight:550}.credit-link{color:var(--accent);text-decoration:underline;text-underline-offset:2px}.quick-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:520px){.field-row{grid-template-columns:1fr}}
+@media(min-width:1680px){main{padding-left:60px;padding-right:60px}.card{padding:25px}.card h3{font-size:19px}}
+@media(max-width:1250px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{gap:25px}h1{font-size:43px}.hero-text{font-size:12px}.sidebar{width:226px;padding-left:13px;padding-right:13px}.nav-item{font-size:12.5px;gap:9px}main{margin-left:226px;padding-left:28px;padding-right:28px}.dock{left:calc(50% + 113px);max-width:calc(100% - 260px)}}
+@media(max-width:950px){.hero{grid-template-columns:1fr}.feature-panel{display:none}.hero-text{max-width:650px}.help-grid{grid-template-columns:1fr}.toolbar{flex-wrap:wrap}.search{flex-basis:100%}.summary-meta{margin-left:0;flex-basis:100%}.breadcrumb{font-size:10px}}
+@media(min-width:741px){.filter-row .chip{display:none}.filter-row{margin-bottom:14px}}
+@media(max-width:740px){.sidebar{position:static;width:100%;padding:14px 17px;border-right:0;border-bottom:1px solid var(--line);display:block;overflow:visible}.brand,.brand-sub,.nav-label,.side-bottom,.task-nav{display:none}.sidebar nav{display:flex;gap:4px;overflow:auto}.nav-item{width:auto;white-space:nowrap;margin:0;padding:9px 11px;font-size:11px}.nav-num{display:none}.nav-icon{font-size:16px;width:16px}.nav-label.mobile-hide{display:none}main{margin:0;padding:0 20px 95px}.topbar{min-height:76px}.breadcrumb{display:none}.mobile-brand{display:block}.top-actions .btn{font-size:11px;padding:9px 11px}.hero{padding:29px 0 28px}h1{font-size:42px}.summary-strip{gap:22px;margin-bottom:25px}.grid{gap:12px}.dock{left:50%;max-width:calc(100% - 24px);bottom:15px}.compare-bar{gap:10px}.credit-pill span{display:none}.overlay{padding:10px}.modal{padding:22px;max-height:94vh}.toast{bottom:85px;right:15px}.footer{flex-direction:column;gap:5px}}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.card-desc{min-height:0}.card{padding:21px}.hero h1{font-size:39px}.hero-text{font-size:12px}.summary-item b{font-size:20px}.summary-meta{font-size:9px}.toolbar select{flex:1;min-width:0;width:45%;font-size:11px}.filter-row{gap:6px}.chip{font-size:10px;padding:7px 9px}.result-count{flex-basis:100%;margin-left:0;margin-top:5px}.section-head{align-items:flex-start}.section-head h2{font-size:18px}.section-head p{font-size:10px;max-width:150px;text-align:right}.detail-grid,.account-options{grid-template-columns:1fr}.modal-top h2{font-size:21px}.compare-bar strong{font-size:11px}.compare-bar .btn{font-size:10px}.nav-item{gap:5px;padding:8px}.nav-item .nav-icon{display:none}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}.card:hover{transform:none}}
+@media print{body{background:#fff!important;color:#000!important}.sidebar,.topbar,.hero-links,.toolbar,.filter-row,.dock,.gpu-line,.toast,.overlay,.card-actions,.compare-toggle,.star,.footer,.source-links{display:none!important}main{margin:0;padding:0}.hero{padding:5px 0 20px;display:block}.feature-panel{display:none}h1{font-size:32px}h1 span{color:#000}.grid{grid-template-columns:repeat(2,1fr)}.card{break-inside:avoid;background:#fff;border-color:#bbb;transform:none!important}.card p,.repo-owner,.metric-label,.tag,.likes,.disclosure,.hero-text,.micro{color:#333!important}.category-label{color:#222!important}.card h3{color:#000}.summary-meta{color:#333}.summary-strip{margin-bottom:20px}.tag{border-color:#ccc}}
+
+/* 2.3 · poriadok rovnako ako Audio Atlas: kvóta stále v bočnom menu, appky hneď hore, nič sa neposúva */
+.sidebar{padding:26px 18px 18px}.brand-sub{margin:12px 0 24px 11px}.task-label{margin-top:20px}.nav-item{padding:9px 12px}.task-item{padding:6px 12px}
+.side-bottom{padding-top:16px}.credits{display:flex;flex-direction:column;gap:8px}
+.credit-card{margin-top:0;padding:11px 12px;border-radius:11px;min-height:98px}.credit-head{font-size:8.5px;letter-spacing:1.2px}
+.credit-num{margin:5px 0 7px}.credit-num b{font-size:19px;letter-spacing:-.4px}.credit-num span{font-size:10px}.credit-bar{height:4px}
+.credit-meta{font-size:9.5px;line-height:1.45;margin-top:6px}.credit-meta+.credit-meta{margin-top:2px}
+.credit-actions{display:flex;gap:6px}.credit-actions .btn{flex:1;padding:7px 6px;font-size:10px}
+.side-version{margin:12px 6px 0;letter-spacing:.6px;font-size:9px}#catalogSection{padding-top:30px}
+.footer button.inline-link{font-size:10px}@media(max-width:520px){#refreshButton{flex:1 1 100%}}.card-metrics{align-items:center;padding:12px 0}.card-metrics .likes{padding:0}.card-actions{justify-content:space-between;align-items:center;margin-top:2px}.card-actions .compare-toggle{margin:0}.card-more{font-size:11px;color:var(--muted);text-decoration:none}.card-more:hover{color:var(--text);text-decoration:underline}.card-status{bottom:auto;top:46px}
+@media(max-width:1250px){.sidebar{padding:24px 13px 16px}}
+@media(max-width:740px){.sidebar .side-bottom{display:block;padding-top:10px}.credits{flex-direction:row;flex-wrap:wrap}.credit-card{flex:1 1 180px;min-height:0}.credit-actions{flex:1 1 100%}.side-version{display:none}#catalogSection{padding-top:22px}}
+.mine-actions{margin:4px 0 16px}.mine-tip{color:var(--muted);font-size:12px;line-height:1.7;margin-bottom:18px}.mine-filter{display:flex;gap:12px;align-items:center;margin-bottom:18px;color:var(--muted);font-size:12px}.mine-filter select,.mine-input{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:11px;width:100%;font:inherit}.mine-filter select{max-width:310px}.mine-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}.mine-cat-pill{display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-size:11px}.mine-cat-pill button{border:0;background:transparent;color:var(--muted);cursor:pointer}.mine-card-link{overflow-wrap:anywhere}.mine-input:focus{outline:2px solid var(--accent)}
+</style>
+</head>
+<body>
+<a href="#main" class="skip">Prejsť na obsah</a>
+<aside class="sidebar" aria-label="Hlavná navigácia">
+ <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span class="wordmark">NOIR</span></div>
+ <div class="brand-sub">THE APP LAUNCHER</div>
+ <div class="nav-label">Tvoj prehľad</div>
+ <nav class="primary-nav">
+  <button class="nav-item active" data-view="apps"><span class="nav-icon" aria-hidden="true">↗</span> Webové appky <span class="nav-num" id="navApps">–</span></button>
+  <button class="nav-item" data-view="catalog"><span class="nav-icon" aria-hidden="true">▦</span> Modely a súbory <span class="nav-num" id="navTotal">–</span></button>
+  <button class="nav-item" data-view="mine"><span class="nav-icon" aria-hidden="true">＋</span> Moje moduly <span class="nav-num" id="mineCount">0</span></button>
+  <button class="nav-item" data-view="favorites"><span class="nav-icon" aria-hidden="true">☆</span> Obľúbené <span class="nav-num" id="favCount">0</span></button>
+  <button class="nav-item" data-view="notes"><span class="nav-icon" aria-hidden="true">≡</span> Moje poznámky</button>
+ </nav>
+ <div class="nav-label task-label">Čo práve tvoríš?</div>
+ <div class="task-nav" id="taskNav" role="group" aria-label="Čo práve tvoríš"></div>
+ <div class="side-bottom">
+  <div class="credits"><button class="credit-card" id="creditCard" data-action="credit" aria-label="Denná ZeroGPU kvóta — otvoriť podrobnosti"></button>
+   <div class="credit-actions"><button class="btn small" data-action="quota-refresh" id="quotaRefresh">↻ Obnoviť stav</button><button class="btn small ghost" data-action="quota-key">Kľúč</button></div></div>
+  <div class="side-version" title="Moje moduly; zálohy do priečinka Noir data">NOIR 2.4.1 · 15. 11. 2026</div>
+ </div>
+</aside>
+<main id="main">
+ <header class="topbar">
+  <div class="breadcrumb">HUGGING FACE &nbsp; / &nbsp; <b>OBRAZ A VIDEO</b></div>
+  <div class="mobile-brand">NOIR</div>
+  <div class="top-actions">
+   <button class="icon-btn" id="themeButton" aria-label="Prepnúť na svetlý vzhľad" title="Zmeniť vzhľad">◐</button>
+   <button class="btn" data-view="help">Ako to funguje</button>
+   <a class="btn" href="https://huggingface.co/settings/profile" target="_blank" rel="noopener noreferrer">Môj HF účet ↗</a>
+  </div>
+ </header>
+ <div id="storageWarning" hidden>Prehliadač nepovolil trvalé ukladanie. Zmeny platia do zatvorenia stránky; môžeš ich exportovať cez Zálohu.</div>
+ <section id="catalogSection" aria-labelledby="sectionTitle">
+  <div class="section-head">
+   <h2 id="sectionTitle">Webové appky</h2>
+   <p id="sectionSubtitle">Priame otvorenie konkrétneho HF Space.</p>
+  </div>
+  <div class="toolbar">
+   <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" aria-label="Hľadať modul" placeholder="Hľadaj názov, autora alebo vlastnosť…" autocomplete="off"><kbd aria-hidden="true">/</kbd></label>
+   <select id="typeFilter" aria-label="Filtrovať podľa typu"><option value="all">Všetky typy</option><option value="space">Webová appka / Space</option><option value="model">Model / checkpoint</option><option value="quant">Kvantizovaná verzia</option><option value="lora">Doplnok LoRA</option><option value="tagger">Tagger</option></select>
+   <select id="runtimeFilter" aria-label="Dostupnosť appiek"><option value="running">Appky hlásiace beh</option><option value="all">Všetky appky</option><option value="unavailable">Ostatné stavy</option></select>
+   <select id="sort" aria-label="Zoradiť moduly"><option value="likes">↓ Páči sa mi</option><option value="downloads">↓ Stiahnutia modelov</option><option value="name">Názov A–Z</option></select>
+  </div>
+  <div class="filter-row" role="group" aria-label="Čo práve tvoríš">
+   <span id="taskChips" style="display:contents"></span>
+   <span class="result-count" id="resultCount" aria-live="polite"></span>
+  </div>
+  <div id="refreshState" role="status" hidden></div>
+  <div class="grid" id="cards"></div>
+  <div class="disclosure"><span aria-hidden="true">ⓘ</span><p id="catalogDisclosure"></p></div>
+ </section>
+ <section id="mineSection" hidden aria-labelledby="mineTitle">
+  <div class="section-head"><h2 id="mineTitle">Moja knižnica HF modulov</h2><p>Vlastné kategórie a odkazy, ktoré si vyberieš.</p></div>
+  <div class="backup-row mine-actions"><button class="btn primary" data-action="add-module">＋ Pridať modul</button><button class="btn" data-action="add-category">＋ Nová kategória</button><button class="btn ghost" data-action="backup">Záloha / prenos</button></div>
+  <p class="mine-tip">Na Hugging Face skopíruj adresu modulu z prehliadača a tu ju vlož. Záznamy sa ukladajú lokálne v tomto prehliadači. Pre prenos na iný Mac exportuj JSON zálohu.</p>
+  <div class="mine-filter"><label for="mineCategory">Kategória</label><select id="mineCategory"></select></div>
+  <div class="grid" id="mineCards"></div>
+  <div id="mineEmpty" class="empty" hidden><h3>Zatiaľ nemáš vlastné moduly.</h3><p>Vytvor kategóriu a pridaj prvý link na HF Space alebo model.</p><button class="btn primary" data-action="add-module">Pridať prvý modul</button></div>
+  <div id="mineCategories"></div>
+ </section>
+ <section id="helpSection" hidden aria-labelledby="helpTitle">
+  <div class="section-head"><h2 id="helpTitle">Malý sprievodca. Veľký rozdiel.</h2><p>Aby si vedel, čo otváraš.</p></div>
+  <div class="help-grid">
+   <article class="help-box"><h3>Kliknutie otvorí appku</h3><p>Tlačidlo „Spustiť appku“ otvorí konkrétny Hugging Face Space v novej karte. Ak si v tom istom prehliadači prihlásený na HF, použije sa tvoje prihlásenie — a s ním aj tvoja PRO kvóta.</p><p>Modely bez vlastného dema majú tlačidlo „Podobná appka“: otvorí najbližšiu bežiacu appku, ale s iným modelom. Na karte je vždy napísané s ktorým.</p></article>
+   <article class="help-box"><h3>Odpočet ZeroGPU kvóty</h3><p>PRO účet má 40 minút ZeroGPU denne. Kvóta sa obnoví presne 24 hodín po prvom použití GPU; potom ďalšie generovanie ide z predplatených kreditov (1 $ za 10 minút). Appky na CPU kvótu nečerpajú.</p><p>S kľúčom „Read billing usage“ NOIR číta presný zostatok priamo z HF. Ak ho máš v Audio Atlase, NOIR ho použije sám a do Atlasu nič nezapisuje. Zostatok sa načíta pri spustení a po každom návrate z appky. Bez kľúča alebo offline počíta odhadom zo zápisov generovaní. <a href="https://huggingface.co/docs/hub/spaces-zerogpu" target="_blank" rel="noopener noreferrer">Pravidlá ZeroGPU ↗</a></p><button class="btn small" data-action="credit">Otvoriť odpočet</button></article>
+   <article class="help-box"><h3>Presný model a alternatíva</h3><p>Webová appka má na karte uvedenú verziu, ktorú používa. Rovnaká rodina modelov neznamená rovnaký checkpoint. Podrobnosti vždy vysvetľujú vzťah k pôvodnému katalógu.</p><p>WD Tagger a JoyCaption majú priame demá svojich pôvodných modelov. Presné demo Chroma1-HD bolo pri overení pozastavené. Verejné demá ostatných rodín majú vlastné verzie a pravidlá; podpora pôvodných NSFW variantov sa im nepripisuje.</p></article>
+   <article class="help-box"><h3>Stav Space sa môže meniť</h3><p>„Hlási beh“ znamená stav RUNNING z API Hugging Face v uvedenom čase. Nepotvrdzuje dokončenie generovania. Môže sa objaviť front, limit GPU alebo chyba.</p><p>Pozastavené Space je označené a predvolený filter ho skryje. Tlačidlo „Obnoviť dostupnosť“ načíta aktuálny stav aj lajky. <a href="https://huggingface.co/docs/hub/spaces-overview" target="_blank" rel="noopener noreferrer">Čo sú HF Spaces ↗</a></p></article>
+   <article class="help-box"><h3>Účet už máš v prehliadači</h3><p>Na spúšťanie cez odkazy sa prihlasuj priamo na HF. Otvorenie Môj HF účet je bežný odkaz, nie formulár na zadávanie tokenu.</p><p>Voliteľné overenie profilu z predchádzajúcej verzie zostáva k dispozícii. Zobrazí iba meno účtu v NOIR; nemení prístup k appkám. Token drží len v pamäti a nedáva ho do zálohy.</p><button class="btn small" data-action="account">Voliteľné overenie profilu</button></article>
+   <article class="help-box"><h3>Moje moduly</h3><p>Vlastná knižnica odkazov na Hugging Face: skopíruj adresu Space alebo modelu z prehliadača, vlož ju cez „Pridať modul“ a zaraď do vlastnej kategórie (AUDIO, VIDEO, IMAGE…).</p><p>NOIR ukladá len odkaz, nič neinštaluje. Moduly sú v tomto zariadení a prenesú sa v zálohe JSON.</p></article><article class="help-box"><h3>Pôvodné modely a tvoje poznámky</h3><p>Modelové repozitáre sú v časti Modely a súbory spolu s ich ID, poznámkami, obľúbenými a stavmi testovania. Repozitár poskytuje váhy a dokumentáciu; nemá automaticky webové rozhranie.</p><p>Obľúbené a poznámky nájdeš na jednom mieste pre appky aj modely. Záloha JSON je kompatibilná s predchádzajúcou verziou.</p><button class="btn small" data-action="backup">Záloha a prenos</button></article>
+   <article class="help-box"><h3>Čo znamená poradie</h3><p>Appky sa zoraďujú podľa lajkov ich Space. Modely podľa stiahnutí konkrétneho repozitára. Ani jeden údaj nie je počet aktívnych používateľov či hodnotenie kvality.</p><p id="helpDate">Adresy, verzie a stav boli overené z verejného HF API a zdrojov autorov. Generovanie výstupov nebolo testované.</p></article>
+  </div>
+ </section>
+ <footer class="footer"><span>NOIR / HF APP LAUNCHER</span><span><button class="inline-link" data-action="backup">Záloha a prenos</button> &nbsp; · &nbsp; <button class="inline-link" data-view="help">Ako to funguje</button></span><span>Bez obrázkov · Bez povinného tokenu</span></footer>
+</main>
+<div class="dock" id="dock">
+ <div class="session-bar" id="sessionBar" role="region" aria-label="Otvorená appka a odpočet" hidden></div>
+ <div class="compare-bar" id="compareBar" hidden>
+  <strong id="compareCount">Vybrané 0 / 3</strong>
+  <button class="btn primary small" id="compareButton">Porovnať vedľa seba</button>
+  <button class="icon-btn" id="clearCompare" aria-label="Zrušiť výber na porovnanie">×</button>
+ </div>
+</div>
+<div id="modalOverlay" class="overlay" hidden>
+ <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"><div id="modalContent"></div></div>
+</div>
+<div id="toast" class="toast" role="status" hidden></div>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+<noscript><p style="padding:20px;margin-left:240px">Na filtrovanie a zobrazenie katalógu zapni JavaScript v prehliadači.</p></noscript>
+<script id="catalogData" type="application/json">[
+  {
+    "id": "SmilingWolf/wd-swinv2-tagger-v3",
+    "name": "WD SwinV2 Tagger v3",
+    "short": "WD SwinV2 Tagger",
+    "version": "v3 / SwinV2",
+    "cat": "caption",
+    "type": "tagger",
+    "tags": [
+      "Tagy",
+      "Anime"
+    ],
+    "description": "Z obrázka vytiahne opisné tagy, postavy a kategóriu obsahu. Užitočný najmä na triedenie ilustrácií a prípravu zoznamu značiek.",
+    "io": "Obrázok → tagy a kategórie",
+    "capability": "Predikuje všeobecné tagy, postavy a obsahové hodnotenie. ONNX verzia podporuje aj dávkové spracovanie. Jeho výstupom sú značky, nie súvislý opis scény.",
+    "evidence": "Tagger pracuje s obsahovým hodnotením dát Danbooru. Je zaradený ako analytický modul; nejde o generátor NSFW obrázkov.",
+    "limit": "Vysoké stiahnutia neznamenajú vysokú návštevnosť dema. Model je trénovaný na ilustračných dátach; použiteľnosť pre fotografie treba osobitne posúdiť.",
+    "documentation": "https://huggingface.co/SmilingWolf/wd-swinv2-tagger-v3",
+    "downloads": 491140,
+    "likes": 99,
+    "checkedAt": "2026-10-17",
+    "tasks": [
+      "describe"
+    ],
+    "demoId": "space:SmilingWolf/wd-tagger"
+  },
+  {
+    "id": "fancyfeast/llama-joycaption-beta-one-hf-llava",
+    "name": "JoyCaption Beta One",
+    "version": "Beta One / 8B",
+    "cat": "caption",
+    "type": "model",
+    "tags": [
+      "Súvislý opis",
+      "SFW + NSFW"
+    ],
+    "description": "Vytvára súvislý slovný opis obrázka. Autor výslovne deklaruje pokrytie SFW aj NSFW obsahu a viacerých výtvarných štýlov.",
+    "io": "Obrázok → opis v prirodzenom jazyku",
+    "capability": "Vizuálny jazykový model určený na automatické titulkovanie obrázkov. Pokrýva fotografie, digitálnu tvorbu aj ilustrácie; opis možno použiť ako textový podklad.",
+    "evidence": "Modelová karta priamo uvádza pokrytie SFW aj NSFW pojmov. Ide o tvrdenie autora, nie o náš nezávislý test.",
+    "limit": "Je to približne 8B model, takže lokálne spustenie vyžaduje kompatibilné prostredie a pamäť. Opis obrazu nie je obnova pôvodného promptu ani jeho nastavení.",
+    "documentation": "https://huggingface.co/fancyfeast/llama-joycaption-beta-one-hf-llava",
+    "downloads": 113828,
+    "likes": 408,
+    "checkedAt": "2026-10-17",
+    "tasks": [
+      "describe"
+    ],
+    "demoId": "space:fancyfeast/joy-caption-beta-one"
+  },
+  {
+    "id": "mradermacher/Qwen3-VL-8B-NSFW-Caption-V4.5-GGUF",
+    "name": "Qwen3-VL NSFW Caption",
+    "version": "V4.5 / GGUF",
+    "cat": "caption",
+    "type": "quant",
+    "tags": [
+      "Dlhší opis",
+      "GGUF"
+    ],
+    "description": "Kvantizované balenie špecializovaného vizuálneho modelu Qwen3-VL na popis obrázkov. Repozitár obsahuje viac veľkostí GGUF.",
+    "io": "Obrázok → slovný opis",
+    "capability": "Poskytuje GGUF verzie modelu thesby/Qwen3-VL-8B-NSFW-Caption-V4.5. Podľa metadát ide o multimodálny model zameraný na dlhšie opisy s označením angličtiny a čínštiny.",
+    "evidence": "NSFW špecializácia je uvedená v názve a značkách repozitára. Pôvodný zdrojový model thesby/Qwen3-VL-8B-NSFW-Caption-V4.5 už na HF neexistuje (overené 17. 10. 2026); GGUF kópia zostala.",
+    "limit": "Zdrojový repozitár s pôvodnou dokumentáciou zmizol, takže ďalšie aktualizácie nečakaj. Pamäťové nároky a kompatibilita závisia od kvantizácie a podpory multimodálnych komponentov v programe. Verejné webové demo tohto checkpointu na HF nie je; najbližšia appka je JoyCaption.",
+    "documentation": "",
+    "downloads": 11570,
+    "likes": 88,
+    "checkedAt": "2026-10-17",
+    "tasks": [
+      "describe"
+    ],
+    "altId": "space:fancyfeast/joy-caption-beta-one",
+    "altNote": "JoyCaption Beta One — iný model, autor deklaruje pokrytie SFW aj NSFW opisov."
+  },
+  {
+    "id": "abenzerps/Qwen-Image-2.1-Turbo-Quantized",
+    "name": "Qwen-Image 2.1 Uncensored",
+    "version": "2.1 / GGUF · FP8 · MLX",
+    "cat": "image",
+    "type": "quant",
+    "tags": [
+      "GGUF, FP8, NVFP4",
+      "MLX pre Apple Silicon"
+    ],
+    "description": "Komunitné balenie Qwen-Image 2.1 pre tvorbu obrázkov z textu. Ponúka GGUF, FP8, NVFP4 aj MLX verzie; správca deklaruje odstránenú cenzúru.",
+    "io": "Text → obrázok",
+    "capability": "Kvantizované formáty Qwen-Image 2.1 pre ComfyUI a MLX. Repozitár bol v októbri 2026 premenovaný z „…-GGUF“ na „…-Quantized“ a pribudli FP8, NVFP4 a MLX súbory.",
+    "evidence": "Podporu adult / NSFW obsahu deklaruje správca tohto repozitára. Nejde o všeobecnú garanciu pre všetky aplikácie používajúce rodinu Qwen.",
+    "limit": "Licencia Qwen Research dovoľuje iba nekomerčné použitie. MLX beží len na Macoch s Apple Silicon; veľkosť súboru nie je celková potrebná pamäť. Webová appka Qwen Image 2.1 GGUF Studio používa presne tento model (Q4_K_M) na ZeroGPU.",
+    "documentation": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Turbo-Quantized",
+    "downloads": 2571722,
+    "likes": 4491,
+    "checkedAt": "2026-10-17",
+    "tasks": [
+      "t2i",
+      "edit"
+    ],
+    "demoId": "space:assembledchaos/qwen-image-2-1-studio"
+  },
+  {
+    "id": "John6666/janku-v5-nsfw-trained-noobai-rou-wei-illustrious-xl-v50-sdxl",
+    "name": "Janku v5 · Illustrious / SDXL",
+    "version": "v5.0 / komunitný merge",
+    "cat": "image",
+    "type": "model",
+    "tags": [
+      "Ilustrácia",
+      "SDXL"
+    ],
+    "description": "Ilustračný checkpoint založený na rodinách NoobAI, RouWei a Illustrious. NSFW zameranie je uvedené v názve a metadátach.",
+    "io": "Text → ilustrovaný obrázok",
+    "capability": "Metadáta uvádzajú kombináciu troch obrazových modelov, kompatibilitu s rodinou SDXL a zameranie na anime ilustráciu. HF balenie zverejnil John6666; pôvodný autor je janxd.",
+    "evidence": "Repozitár je označený ako NSFW-trained a Not-For-All-Audiences. Dostupný text modelovej karty je veľmi stručný.",
+    "limit": "Zaradenie vychádza z vysokých stiahnutí a metadát, nie z overenej kvality. Podrobný technický opis priamo na HF chýba; výsledky ani presné výhody nemožno garantovať.",
+    "documentation": "",
+    "downloads": 112669,
+    "likes": 27,
+    "checkedAt": "2026-10-17",
+    "tasks": [
+      "t2i"
+    ],
+    "altId": "space:IbarakiDouji/WAI-NSFW-illustrious-SDXL",
+    "altNote": "WAI NSFW Illustrious SDXL — rovnaká rodina Illustrious / SDXL, iný checkpoint."
+  },
+  {
+    "id": "lodestones/Chroma1-HD",
+    "name": "Chroma1-HD",
+    "version": "Chroma1 / 8.9B",
+    "cat": "image",
+    "type": "model",
+    "tags": [
+      "Univerzálny základ",
+      "FLUX rodina"
+    ],
+    "description": "Univerzálny model na tvorbu obrázkov z textu a základ pre ďalšie doladenie. Autor upozorňuje na možnosť explicitných výstupov.",
+    "io": "Text → obrázok",
+    "capability": "Obrazový základ s približne 8,9 miliardy parametrov odvodený od architektúry FLUX. Podporuje fotografické aj umelecké štýly a ďalšie doladenie.",
+    "evidence": "Modelová karta uvádza, že nie je zarovnaný so špecifickým bezpečnostným filtrom a môže produkovať explicitný obsah. Nie je prezentovaný ako výhradne NSFW špecialista.",
+    "limit": "HD v názve nie je garancia konkrétneho rozlíšenia alebo kvality. Počet stiahnutí zahŕňa aj bežné použitie, nielen obsah pre dospelých. Pôvodné demo multimodalart je pozastavené; NOIR spúšťa bežiace demo NikAgs s rovnakým modelom.",
+    "documentation": "https://huggingface.co/lodestones/Chroma1-HD",
+    "downloads": 66580,
+    "likes": 417,
+    "checkedAt": "2026-10-17",
+    "tasks": [
+      "t2i"
+    ],
+    "demoId": "space:NikAgs/Chroma1-HD"
+  },
+  {
+    "id": "lesliemore/z-image-turbo-nsfw-v2-GGUF",
+    "name": "Z-Image Turbo NSFW v2",
+    "version": "v2 / GGUF Q8_0",
+    "cat": "image",
+    "type": "quant",
+    "tags": [
+      "Turbo",
+      "GGUF"
+    ],
+    "description": "GGUF konverzia NSFW variantu Z-Image Turbo. Je to menšie balenie existujúceho modelu, nie nový generátor od pôvodného tímu.",
+    "io": "Text → obrázok",
+    "capability": "Repozitár prevádza model tewea/z_image_turbo_bf16_nsfw do formátu GGUF Q8_0. Autor uvádza zníženie pamäťových nárokov pri zachovaní blízkosti k pôvodnej verzii.",
+    "evidence": "Modelová karta výslovne identifikuje základ ako NSFW finetune Z-Image Turbo.",
+    "limit": "Je potrebný program podporujúci daný GGUF obrazový model a sprievodné komponenty. Rýchlosť závisí od zariadenia a programu; označenie Turbo ju samo nezaručuje.",
+    "documentation": "",
+    "downloads": 65875,
+    "likes": 28,
+    "checkedAt": "2026-10-17",
+    "tasks": [
+      "t2i"
+    ],
+    "altId": "space:assembledchaos/qwen-image-2-1-studio",
+    "altNote": "Qwen-Image 2.1 Uncensored — iný model bez obsahového filtra; oficiálne Z-Image Turbo demo filter má."
+  },
+  {
+    "id": "lopi999/Wan2.2-I2V_General-NSFW-LoRA",
+    "name": "Wan 2.2 General NSFW LoRA",
+    "short": "Wan 2.2 NSFW LoRA",
+    "version": "Wan 2.2 I2V / LoRA",
+    "cat": "video",
+    "type": "lora",
+    "tags": [
+      "Doplnok",
+      "Obrázok → video"
+    ],
+    "description": "NSFW doplnok pre obrazovo-video model Wan 2.2. Samostatne nefunguje: vyžaduje príslušný základný model.",
+    "io": "Obrázok + text → video, so základným modelom",
+    "capability": "LoRA adaptér naviazaný na Wan-AI/Wan2.2-I2V-A14B. HF repozitár je komunitná kópia; samotná modelová karta obsahuje iba stručné údaje.",
+    "evidence": "Zameranie General NSFW uvádza názov a dokumentácia adaptéra. Ide o doplnok pre video rodinu Wan.",
+    "limit": "HF automaticky uvádza text-to-image, ale base_model aj názov identifikujú video adaptér. Tu je preto zaradený do videa. Počet stiahnutí LoRA neporovnávaj priamo s používanosťou samostatných modelov.",
+    "documentation": "",
+    "downloads": 177416,
+    "likes": 143,
+    "checkedAt": "2026-10-17",
+    "tasks": [
+      "i2v"
+    ],
+    "demoId": "space:amisima/Wan_2.2_I2V_Studio"
+  },
+  {
+    "id": "ChrisColeTech/LTX-2.3-uncensored-v1.4-FP8",
+    "name": "LTX 2.3 Uncensored",
+    "version": "v1.4 / FP8 a GGUF",
+    "cat": "video",
+    "type": "quant",
+    "tags": [
+      "Text aj obrázok",
+      "Audio / video"
+    ],
+    "description": "Komunitné balenie LTX 2.3 s integrovanými úpravami. Autor uvádza tvorbu videa z textu alebo obrázka a režimy pracujúce so zvukom.",
+    "io": "Text / obrázok / audio → video podľa režimu",
+    "capability": "Modelová karta uvádza text-to-video, image-to-video a ďalšie audiovizuálne režimy. Balenie kombinuje základ LTX 2.3 s adaptérmi a kvantizovanými variantmi.",
+    "evidence": "Uncensored / NSFW zameranie je priamo deklarované autorom. Ide o komunitnú úpravu, nie oficiálny release od Lightricks.",
+    "limit": "Podpora jednotlivých režimov závisí od konkrétnej zostavy programu a komponentov. Tvrdenia autora o rýchlosti, dĺžke a kvalite videa neboli nezávisle testované.",
+    "documentation": "",
+    "downloads": 106502,
+    "likes": 300,
+    "checkedAt": "2026-10-17",
+    "tasks": [
+      "t2v",
+      "i2v"
+    ],
+    "altId": "space:rdata92/LTX-2.3-10Eros",
+    "altNote": "10 Eros — iný komunitný LTX 2.3 checkpoint, iba obrázok → video."
+  },
+  {
+    "id": "ChrisColeTech/LTX-2.5-uncensored-v1.1-FP8",
+    "name": "LTX 2.5 Uncensored",
+    "version": "v1.1 / FP8 a GGUF",
+    "cat": "video",
+    "type": "quant",
+    "tags": [
+      "Novšia vetva LTX",
+      "Audio / video"
+    ],
+    "description": "Novšia komunitná vetva založená na LTX 2.5. Dokumentácia uvádza textové, obrazové a zvukové vstupy aj prácu s referenciami.",
+    "io": "Text / obrázok / audio → video podľa režimu",
+    "capability": "Balenie s viacerými integrovanými adaptérmi; autor deklaruje generovanie z textu, animovanie obrázka a podporu referenčných aj audiovizuálnych režimov.",
+    "evidence": "Autor verziu označuje ako Uncensored a uvádza NSFW komponent. Je to osobitná distribúcia od ChrisColeTech.",
+    "limit": "Novšia verzia automaticky neznamená lepší výsledok. Iný základ a komponenty môžu meniť kompatibilitu existujúceho projektu. Menšia história stiahnutí oproti vetve 2.3.",
+    "documentation": "",
+    "downloads": 68132,
+    "likes": 102,
+    "checkedAt": "2026-10-17",
+    "tasks": [
+      "t2v",
+      "i2v"
+    ],
+    "altId": "space:rdata92/LTX-2.3-10Eros",
+    "altNote": "10 Eros — staršia vetva LTX 2.3, iba obrázok → video."
+  },
+  {
+    "id": "NSFW-API/NSFW_Wan_14b",
+    "name": "NSFW Wan 14B",
+    "version": "Wan 2.1 / 14B",
+    "cat": "video",
+    "type": "model",
+    "tags": [
+      "Text → video",
+      "Checkpoint"
+    ],
+    "description": "Špecializovaný komunitný model odvodený od Wan 2.1 na krátke videá z textu. Repozitár obsahuje viac tréningových checkpointov.",
+    "io": "Text → krátke video",
+    "capability": "Autor opisuje 14B text-to-video model s NSFW doladením. Na rozdiel od položky General NSFW LoRA ide o distribúciu modelových checkpointov.",
+    "evidence": "NSFW špecializácia je výslovne uvedená v modelovej karte. Kvalita pohybu a konzistencia sú tvrdenia autora.",
+    "limit": "Má výrazne menej HF stiahnutí než ostatní video kandidáti v tomto výbere. Je zaradený pre jasnú text-to-video špecializáciu; krátke klipy stále môžu obsahovať vizuálne chyby.",
+    "documentation": "",
+    "downloads": 8798,
+    "likes": 539,
+    "checkedAt": "2026-10-17",
+    "tasks": [
+      "t2v"
+    ],
+    "altId": "space:amisima/Wan_2.2_I2V_Studio",
+    "altNote": "Wan 2.2 Studio — novší Wan, ale obrázok → video (nie text → video)."
+  },
+  {
+    "id": "Noctaluna/Noct-Q-Uncensored-Qwen-Image-2.1",
+    "name": "Noct Q · Qwen-Image 2.1",
+    "short": "Noct Q",
+    "version": "V4 / INT8 ConvRot",
+    "cat": "image",
+    "type": "model",
+    "tags": [
+      "Fotorealizmus",
+      "Novinka 2026"
+    ],
+    "description": "Komunitný merge Qwen-Image 2.1 zameraný na fotorealizmus. Autor deklaruje explicitné výstupy bez LoRA a čitateľný text v obraze.",
+    "io": "Text → obrázok (aj úprava obrázka)",
+    "capability": "INT8 súbor V4 (7,3 GB) pre ComfyUI 0.37+ s pripraveným workflow; autor uvádza 8–12 GB grafickú kartu, 25 krokov a CFG 3. Rovnaké súbory vedia aj úpravu obrázka cez šablónu Qwen Image 2.1 edit.",
+    "evidence": "Uncensored / NSFW zameranie je výslovne uvedené v modelovej karte a značkách. Ide o merge s upravenými váhami, nie o oficiálny release Qwen.",
+    "limit": "Licencia Qwen Research — iba nekomerčné použitie. Vyžaduje samostatný text encoder a VAE z Comfy-Org. Ďalšie formáty a galéria sú podľa autora na Civitai.",
+    "documentation": "https://huggingface.co/Noctaluna/Noct-Q-Uncensored-Qwen-Image-2.1",
+    "downloads": 239107,
+    "likes": 559,
+    "checkedAt": "2026-10-17",
+    "tasks": [
+      "t2i",
+      "edit"
+    ],
+    "demoId": "space:acloudguy/noct-q-studio"
+  },
+  {
+    "id": "TenStrip/LTX2.3-10Eros",
+    "name": "10 Eros · LTX 2.3",
+    "short": "10 Eros",
+    "version": "v1.5 / BF16 a FP8",
+    "cat": "video",
+    "type": "model",
+    "tags": [
+      "Obrázok → video",
+      "Novinka 2026"
+    ],
+    "description": "Komunitný merge LTX 2.3 pre animovanie obrázka. Autor ho stavia ako NSFW variant s dôrazom na stabilnejší pohyb a dodržanie promptu.",
+    "io": "Obrázok + text → video",
+    "capability": "Vrstvovo škálovaný merge nad Sulphur-2-base. BF16 sa načíta ako celý checkpoint s CLIP a VAE; existujú FP8, INT8 aj GGUF kvantizácie a hotové ComfyUI workflow.",
+    "evidence": "Repozitár je označený not-for-all-audiences a karta opisuje explicitné zameranie. Ide o komunitnú úpravu, nie o release Lightricks.",
+    "limit": "Autor upozorňuje, že prompt musí byť veľmi podrobný a najlepšie funguje s odporúčanou DMD LoRA. Starší jav — duchovia anatómie či titulky — sa môže objaviť. Licencia nie je v karte uvedená.",
+    "documentation": "https://huggingface.co/TenStrip/LTX2.3-10Eros",
+    "downloads": 59054,
+    "likes": 593,
+    "checkedAt": "2026-10-17",
+    "tasks": [
+      "i2v"
+    ],
+    "demoId": "space:rdata92/LTX-2.3-10Eros"
+  }
+]</script>
+<script id="spacesData" type="application/json">[
+  {
+    "id": "space:SmilingWolf/wd-tagger",
+    "spaceId": "SmilingWolf/wd-tagger",
+    "name": "WD Tagger",
+    "short": "WD Tagger",
+    "cat": "caption",
+    "type": "space",
+    "version": "Výber WD taggerov / v3",
+    "description": "Z obrázka vytvorí tagy a kategórie. V rozhraní vyberieš konkrétny tagger aj prah istoty.",
+    "io": "Obrázok → tagy",
+    "capability": "Rozpoznáva opisné značky, postavy a kategórie. Rozhranie ponúka viacero modelov vrátane WD SwinV2 v3.",
+    "model": "SmilingWolf/wd-swinv2-tagger-v3",
+    "evidence": "Priama appka autora. V zozname modelov obsahuje aj WD SwinV2 v3 z pôvodného katalógu; vyberieš ho v appke.",
+    "limit": "Výstupom sú značky, nie pôvodný prompt obrázka. Vhodnosť pre fotografie sa môže líšiť od ilustrácií. Beží na CPU alebo volá službu prevádzkovateľa, takže nečerpá tvoju dennú ZeroGPU kvótu.",
+    "tags": [
+      "Tagy",
+      "Výber modelu"
+    ],
+    "stage": "RUNNING",
+    "likes": 342,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://smilingwolf-wd-tagger.hf.space",
+    "hw": "cpu",
+    "gpuSec": 0,
+    "tasks": [
+      "describe"
+    ]
+  },
+  {
+    "id": "space:fancyfeast/joy-caption-beta-one",
+    "spaceId": "fancyfeast/joy-caption-beta-one",
+    "name": "JoyCaption Beta One",
+    "short": "JoyCaption Beta One",
+    "cat": "caption",
+    "type": "space",
+    "version": "Beta One / 8B",
+    "description": "Opíše vložený obrázok súvislým textom. Nastavíš štýl, dĺžku opisu aj doplnkové požiadavky.",
+    "io": "Obrázok → slovný opis",
+    "capability": "Ponúka viacero štýlov titulkovania, voľbu dĺžky a vlastný text zadania. Opis priebežne vypisuje do textového poľa.",
+    "model": "fancyfeast/llama-joycaption-beta-one-hf-llava",
+    "evidence": "Priama appka autora používa presne model JoyCaption Beta One z pôvodného katalógu.",
+    "limit": "Opis nie je obnova pôvodného promptu. Prístup a dostupný výpočtový čas riadi Hugging Face Space.",
+    "tags": [
+      "Súvislý opis",
+      "Vlastné zadanie"
+    ],
+    "stage": "RUNNING",
+    "likes": 1196,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://fancyfeast-joy-caption-beta-one.hf.space",
+    "hw": "zero",
+    "gpuSec": 15,
+    "tasks": [
+      "describe"
+    ]
+  },
+  {
+    "id": "space:Qwen/Qwen3-VL-Demo",
+    "spaceId": "Qwen/Qwen3-VL-Demo",
+    "name": "Qwen3-VL",
+    "short": "Qwen3-VL",
+    "cat": "caption",
+    "type": "space",
+    "version": "235B A22B / Instruct + Thinking",
+    "description": "Vizuálny chat na opis obrázkov a videí. Môžeš sa dopytovať na objekty, scénu alebo text v obraze.",
+    "io": "Obrázok / video + otázka → text",
+    "capability": "Oficiálne rozhranie podporuje multimodálny vstup a režim Thinking. Konfigurácia uvádza Qwen3-VL 235B A22B Instruct a Thinking.",
+    "model": "",
+    "evidence": "Samostatná oficiálna appka Qwen. Používa 235B A22B; pôvodný komunitný 8B Caption V4.5 GGUF v nej nie je deklarovaný.",
+    "limit": "Rozhranie volá službu prevádzkovateľa. Toto nie je demo pôvodného komunitného checkpointu ani záruka rovnakého správania. Beží na CPU alebo volá službu prevádzkovateľa, takže nečerpá tvoju dennú ZeroGPU kvótu.",
+    "tags": [
+      "Vizuálny chat",
+      "Obrázky aj video"
+    ],
+    "stage": "RUNNING",
+    "likes": 479,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://qwen-qwen3-vl-demo.hf.space",
+    "hw": "cpu",
+    "gpuSec": 0,
+    "tasks": [
+      "describe"
+    ]
+  },
+  {
+    "id": "space:Tongyi-MAI/Z-Image-Turbo",
+    "spaceId": "Tongyi-MAI/Z-Image-Turbo",
+    "name": "Z-Image Turbo",
+    "short": "Z-Image Turbo",
+    "cat": "image",
+    "type": "space",
+    "version": "Tongyi-MAI / Turbo",
+    "description": "Rýchle generovanie obrázkov z textu. Vyberieš rozlíšenie a seed priamo vo webovom rozhraní.",
+    "io": "Text → obrázok",
+    "capability": "Oficiálne demo modelu Z-Image Turbo s nastavením rozmerov, seedu a ďalších parametrov. Predvolene používa osem krokov.",
+    "model": "Tongyi-MAI/Z-Image-Turbo",
+    "evidence": "Oficiálna Turbo verzia od Tongyi-MAI. Je to iný model než komunitný GGUF variant v pôvodnom katalógu.",
+    "limit": "Zdroj appky obsahuje kontrolu obsahu. Dostupnosť a povolené výstupy určuje prevádzkovateľ dema.",
+    "tags": [
+      "Rýchle demo",
+      "Rozlíšenie a seed"
+    ],
+    "stage": "RUNNING",
+    "likes": 1932,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://tongyi-mai-z-image-turbo.hf.space",
+    "hw": "zero",
+    "gpuSec": 15,
+    "tasks": [
+      "t2i"
+    ]
+  },
+  {
+    "id": "space:Qwen/Qwen-Image",
+    "spaceId": "Qwen/Qwen-Image",
+    "name": "Qwen Image",
+    "short": "Qwen Image",
+    "cat": "image",
+    "type": "space",
+    "version": "Qwen / pôvodný Qwen-Image",
+    "description": "Vytvára obrázky z textového zadania. Ponúka pomer strán, seed a nastavenia generovania.",
+    "io": "Text → obrázok",
+    "capability": "Oficiálne rozhranie Qwen-Image. Vie generovať kompozície podľa textu a umožňuje meniť intenzitu vedenia promptom aj počet krokov.",
+    "model": "Qwen/Qwen-Image",
+    "evidence": "Používa oficiálny Qwen-Image. Nepoužíva komunitný Qwen-Image 2.1 GGUF z pôvodného katalógu.",
+    "limit": "Vlastnosti tohto dema nemožno automaticky prenášať na iné verzie Qwen-Image. Môžeš naraziť na front alebo limit HF.",
+    "tags": [
+      "Text → obraz",
+      "Pomer strán"
+    ],
+    "stage": "RUNNING",
+    "likes": 929,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://qwen-qwen-image.hf.space",
+    "hw": "zero",
+    "gpuSec": 45,
+    "tasks": [
+      "t2i"
+    ]
+  },
+  {
+    "id": "space:gokaygokay/Chroma",
+    "spaceId": "gokaygokay/Chroma",
+    "name": "Chroma",
+    "short": "Chroma",
+    "cat": "image",
+    "type": "space",
+    "version": "v48 / detail-calibrated",
+    "description": "Komunitná appka na obrázky z promptu s negatívnym promptom, rozmermi, krokmi, CFG a seedom.",
+    "io": "Text → obrázok",
+    "capability": "Gradio rozhranie používa ComfyUI workflow a checkpoint chroma-unlocked-v48-detail-calibrated zo série Chroma.",
+    "model": "lodestones/Chroma",
+    "evidence": "Toto demo používa Chroma v48. Samostatné demo Chroma1-HD je tiež v zozname, ale pri overení bolo pozastavené.",
+    "limit": "Chroma v48 a Chroma1-HD sú odlišné verzie. Zelený stav HF potvrdzuje beh rozhrania, nie úspech každého generovania.",
+    "tags": [
+      "Negatívny prompt",
+      "Komunitná appka"
+    ],
+    "stage": "RUNNING",
+    "likes": 252,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://gokaygokay-chroma.hf.space",
+    "hw": "zero",
+    "gpuSec": 45,
+    "tasks": [
+      "t2i"
+    ]
+  },
+  {
+    "id": "space:acloudguy/noct-q-studio",
+    "spaceId": "acloudguy/noct-q-studio",
+    "name": "Noct Q Studio",
+    "short": "Noct Q Studio",
+    "cat": "image",
+    "type": "space",
+    "version": "Noct Q V4 / INT8 ConvRot",
+    "description": "Obrázky z textu aj úprava vloženého obrázka s presným modelom Noct Q V4. Päť formátov plátna, negatívny prompt a seed.",
+    "io": "Text (+ voliteľný obrázok) → obrázok",
+    "capability": "Gradio appka na ComfyUI jadre s pripnutým checkpointom NoctQ_V4_int8_convrot. Predvolené nastavenia podľa autora modelu: 25 krokov, Euler, CFG 3. PNG si stiahneš aj s metadátami generovania.",
+    "model": "Noctaluna/Noct-Q-Uncensored-Qwen-Image-2.1",
+    "evidence": "Konfigurácia Space výslovne deklaruje presný checkpoint Noct Q V4 bez náhradného modelu. Komunitná appka, nie od autora modelu.",
+    "limit": "Beží na bezplatnom ZeroGPU — počítaj s frontom a dennou kvótou GPU. Licencia Noct Q dovoľuje iba nekomerčné použitie.",
+    "tags": [
+      "Presný model",
+      "Novinka"
+    ],
+    "stage": "RUNNING",
+    "likes": 27,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://acloudguy-noct-q-studio.hf.space",
+    "hw": "zero",
+    "gpuSec": 60,
+    "tasks": [
+      "t2i",
+      "edit"
+    ]
+  },
+  {
+    "id": "space:Lightricks/LTX-2-3",
+    "spaceId": "Lightricks/LTX-2-3",
+    "name": "LTX 2.3 Distilled",
+    "short": "LTX 2.3 Distilled",
+    "cat": "video",
+    "type": "space",
+    "version": "Lightricks / 2.3 Distilled",
+    "description": "Vygeneruje krátke video z textu a voliteľného úvodného obrázka. V rozhraní nastavíš dĺžku a seed.",
+    "io": "Text + voliteľný obrázok → video",
+    "capability": "Oficiálna appka Lightricks ponúka text-to-video aj image-to-video, dĺžku 1 až 10 sekúnd a voliteľnú úpravu promptu.",
+    "model": "Lightricks/LTX-2.3",
+    "evidence": "Používa LTX 2.3 Distilled od Lightricks. Komunitné upravené checkpointy 2.3 a 2.5 z pôvodného katalógu tu nie sú deklarované.",
+    "limit": "Dĺžka je voľba rozhrania, nie záruka úspechu pri každom nastavení. Prevádzka má vlastné limity GPU a pravidlá.",
+    "tags": [
+      "Text aj obrázok",
+      "1–10 sekúnd"
+    ],
+    "stage": "RUNNING",
+    "likes": 484,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://lightricks-ltx-2-3.hf.space",
+    "hw": "zero",
+    "gpuSec": 60,
+    "tasks": [
+      "t2v",
+      "i2v"
+    ]
+  },
+  {
+    "id": "space:Wan-AI/Wan2.2-S2V",
+    "spaceId": "Wan-AI/Wan2.2-S2V",
+    "name": "Wan2.2 S2V",
+    "short": "Wan2.2 S2V",
+    "cat": "video",
+    "type": "space",
+    "version": "Wan-AI / S2V distilled",
+    "description": "Rozhýbe referenčný obrázok podľa nahrávky. Vložíš obrázok a zvuk, potom vyberieš rozlíšenie 480p alebo 720p.",
+    "io": "Obrázok + zvuk → video",
+    "capability": "Oficiálne audio-driven demo Wan2.2. Zdroj rozhrania uvádza distilled model a volanie služby wan2.2-s2v.",
+    "model": "Wan-AI/Wan2.2-S2V-14B",
+    "evidence": "Samostatná appka S2V od Wan-AI. Nie je to demo pôvodnej I2V LoRA ani komunitného Wan 14B checkpointu.",
+    "limit": "Vyžaduje obrázok a audio; nejde o čisté text-to-video. Plný 14B model v odkaze je referenčný model, demo používa distilled službu. Beží na CPU alebo volá službu prevádzkovateľa, takže nečerpá tvoju dennú ZeroGPU kvótu.",
+    "tags": [
+      "Audio → pohyb",
+      "480p / 720p"
+    ],
+    "stage": "RUNNING",
+    "likes": 433,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://wan-ai-wan2-2-s2v.hf.space",
+    "hw": "cpu",
+    "gpuSec": 0,
+    "tasks": [
+      "s2v"
+    ]
+  },
+  {
+    "id": "space:assembledchaos/qwen-image-2-1-studio",
+    "spaceId": "assembledchaos/qwen-image-2-1-studio",
+    "name": "Qwen Image 2.1 GGUF Studio",
+    "short": "Qwen 2.1 Studio",
+    "cat": "image",
+    "type": "space",
+    "version": "Qwen-Image 2.1 Uncensored / GGUF Q4_K_M",
+    "description": "Obrázok z textu, úprava vloženého obrázka aj priehľadné PNG. Beží na presnom modeli Qwen-Image 2.1 Uncensored.",
+    "io": "Text (+ voliteľný obrázok) → obrázok",
+    "capability": "Tri režimy: vytvoriť obrázok, upraviť obrázok podľa jednej referencie a priehľadné PNG. Päť pomerov strán od 1:1 po 9:16.",
+    "model": "abenzerps/Qwen-Image-2.1-Turbo-Quantized",
+    "evidence": "Zdroj appky načítava presne qwen-image-2.1-Q4_K_M.gguf z repozitára abenzerps (pôvodný názov …-GGUF) a overuje jeho SHA256. Komunitná appka, nie od autora modelu.",
+    "limit": "Beží na ZeroGPU — jedno generovanie si rezervuje najviac 60 s GPU. Licencia Qwen Research dovoľuje iba nekomerčné použitie.",
+    "tags": [
+      "Presný model",
+      "Tvorba aj úprava"
+    ],
+    "stage": "RUNNING",
+    "likes": 183,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://assembledchaos-qwen-image-2-1-studio.hf.space",
+    "hw": "zero",
+    "gpuSec": 45,
+    "tasks": [
+      "t2i",
+      "edit"
+    ]
+  },
+  {
+    "id": "space:NikAgs/Chroma1-HD",
+    "spaceId": "NikAgs/Chroma1-HD",
+    "name": "Chroma1-HD Demo",
+    "short": "Chroma1-HD",
+    "cat": "image",
+    "type": "space",
+    "version": "Chroma1-HD / diffusers",
+    "description": "Obrázok z textu s presným modelom Chroma1-HD. Negatívny prompt, kroky, rozmer a seed nastavíš v rozhraní.",
+    "io": "Text → obrázok",
+    "capability": "Predvolené nastavenia podľa autora modelu: guidance 3, 40 krokov, 1024 × 1024. Čas GPU sa počíta podľa krokov a rozlíšenia.",
+    "model": "lodestones/Chroma1-HD",
+    "evidence": "Zdroj appky načítava priamo lodestones/Chroma1-HD cez ChromaPipeline. Nahrádza pozastavené demo multimodalart.",
+    "limit": "Malá komunitná appka (málo lajkov) na ZeroGPU. 40 krokov pri 1024 px si vezme zhruba 1,5 min kvóty.",
+    "tags": [
+      "Presný model",
+      "Negatívny prompt"
+    ],
+    "stage": "RUNNING",
+    "likes": 3,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://nikags-chroma1-hd.hf.space",
+    "hw": "zero",
+    "gpuSec": 90,
+    "tasks": [
+      "t2i"
+    ]
+  },
+  {
+    "id": "space:rdata92/LTX-2.3-10Eros",
+    "spaceId": "rdata92/LTX-2.3-10Eros",
+    "name": "LTX 2.3 · 10 Eros",
+    "short": "10 Eros I2V",
+    "cat": "video",
+    "type": "space",
+    "version": "10Eros v1 fp8 / workflow I2V v3.2",
+    "description": "Rozhýbe vložený obrázok podľa textu, aj s natívnym zvukom. Postavené na modeli 10 Eros a workflow jeho autora.",
+    "io": "Obrázok + text → video so zvukom",
+    "capability": "ComfyUI workflow 10Eros LikenessGuide I2V v3.2 od autora TenStrip s checkpointom 10Eros_v1-fp8mixed.",
+    "model": "TenStrip/LTX2.3-10Eros",
+    "evidence": "Zdroj appky sťahuje 10Eros_v1-fp8mixed_learned.safetensors z TenStrip/LTX2.3-10Eros a oficiálne workflow. Pôvodná appka 00000tt bola z HF zmazaná.",
+    "limit": "Video na ZeroGPU je drahé — počítaj aj 2–3 min kvóty na klip. Autor modelu odporúča veľmi podrobný prompt.",
+    "tags": [
+      "Obrázok → video",
+      "Natívny zvuk"
+    ],
+    "stage": "RUNNING",
+    "likes": 43,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://rdata92-ltx-2-3-10eros.hf.space",
+    "hw": "zero",
+    "gpuSec": 150,
+    "tasks": [
+      "i2v"
+    ]
+  },
+  {
+    "id": "space:amisima/Wan_2.2_I2V_Studio",
+    "spaceId": "amisima/Wan_2.2_I2V_Studio",
+    "name": "Wan 2.2 Studio",
+    "short": "Wan 2.2 Studio",
+    "cat": "video",
+    "type": "space",
+    "version": "Wan 2.2 I2V 14B / LoRA katalóg",
+    "description": "Rozhýbe fotku a poskladá dlhšiu scénu z viacerých klipov. Má zabudovaný výber LoRA vrátane Wan 2.2 General NSFW.",
+    "io": "Obrázok + text → video",
+    "capability": "Režim Simple aj Pro, plánovač scény, zámok identity, až 64 nadväzujúcich klipov a doplnenie zvuku.",
+    "model": "lopi999/Wan2.2-I2V_General-NSFW-LoRA",
+    "evidence": "Katalóg LoRA v zdroji appky obsahuje lopi999/Wan2.2-I2V_General-NSFW-LoRA; Space je označený not-for-all-audiences.",
+    "limit": "Každý klip čerpá ZeroGPU kvótu; dlhá scéna z viacerých klipov ju minie rýchlo. LoRA vyber v appke.",
+    "tags": [
+      "LoRA v appke",
+      "Dlhšie scény"
+    ],
+    "stage": "RUNNING",
+    "likes": 71,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://amisima-wan-2-2-i2v-studio.hf.space",
+    "hw": "zero",
+    "gpuSec": 120,
+    "tasks": [
+      "i2v"
+    ]
+  },
+  {
+    "id": "space:IbarakiDouji/WAI-NSFW-illustrious-SDXL",
+    "spaceId": "IbarakiDouji/WAI-NSFW-illustrious-SDXL",
+    "name": "WAI NSFW Illustrious SDXL",
+    "short": "WAI Illustrious",
+    "cat": "image",
+    "type": "space",
+    "version": "WAI v12 – v17 / SDXL",
+    "description": "Ilustrácie z textu na rodine Illustrious / SDXL. V appke prepínaš verzie checkpointu WAI.",
+    "io": "Text → ilustrovaný obrázok",
+    "capability": "Výber verzií WAI NSFW Illustrious SDXL v12 až v17, negatívny prompt a nastavenia generovania.",
+    "model": "",
+    "evidence": "Najbližšia bežiaca appka k Janku v5 — rovnaká rodina Illustrious / SDXL, ale iný checkpoint. Presné demo Janku na HF nie je.",
+    "limit": "Ilustračný štýl; výsledky sa od Janku líšia. Beží na ZeroGPU.",
+    "tags": [
+      "Illustrious",
+      "Výber verzie"
+    ],
+    "stage": "RUNNING",
+    "likes": 244,
+    "downloads": null,
+    "checkedAt": "2026-10-21",
+    "host": "https://ibarakidouji-wai-nsfw-illustrious-sdxl.hf.space",
+    "hw": "zero",
+    "gpuSec": 30,
+    "tasks": [
+      "t2i"
+    ]
+  }
+]</script>
+<script>
+/* ---------- PALINDROM · priečinok s dátami appky (Stiahnuté súbory / „… data“) ---------- */
+/* Zálohy sa zapisujú do jedného zapamätaného priečinka a prepisujú rovnaký súbor.
+   Keď to Chrome nedovolí, appka sa vráti k obyčajnému stiahnutiu. */
+window.PalindromDataDir=function(appId,folderName,hint){
+ const DB='palindrom-datadir-v1',STORE='handles',supported=typeof window.showDirectoryPicker==='function';
+ let handle=null;const ready=load();
+ function db(){return new Promise((res,rej)=>{if(!('indexedDB' in window)){res(null);return}const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE)};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+ async function put(h){try{const d=await db();if(!d)return;await new Promise((res,rej)=>{const tx=d.transaction(STORE,'readwrite');if(h)tx.objectStore(STORE).put(h,appId);else tx.objectStore(STORE).delete(appId);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)});d.close()}catch(e){}}
+ async function load(){if(!supported)return null;try{const d=await db();if(!d)return null;handle=await new Promise(res=>{const q=d.transaction(STORE).objectStore(STORE).get(appId);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null)});d.close()}catch(e){handle=null}return handle}
+ async function allowed(ask){if(!handle)return false;try{let s=await handle.queryPermission({mode:'readwrite'});if(s==='granted')return true;if(!ask)return false;s=await handle.requestPermission({mode:'readwrite'});return s==='granted'}catch(e){return false}}
+ async function choose(){const h=await window.showDirectoryPicker({id:'palindrom-'+appId,mode:'readwrite',startIn:handle||'downloads'});handle=h;await put(h);return h}
+ function download(name,blob){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)}
+ /* Volaj priamo z kliknutia: v prípade potreby otvorí výber priečinka alebo si vypýta povolenie. */
+ async function ensure(){if(!supported)return false;await ready;if(handle&&await allowed(true))return true;try{if(hint)hint('Vyber priečinok „'+folderName+'“ v Stiahnutých súboroch — appka si ho zapamätá.');await choose();return await allowed(true)}catch(e){if(e&&e.name==='AbortError')throw e;return false}}
+ async function write(name,blob){const fh=await handle.getFileHandle(name,{create:true}),w=await fh.createWritable();await w.write(blob);await w.close()}
+ /* Výsledok: {where:'folder',folder,name} · {where:'download',name} · {where:'cancel'} */
+ async function save(name,data,mime){const blob=data instanceof Blob?data:new Blob([data],{type:mime||'application/json;charset=utf-8'});
+  try{if(await ensure()){await write(name,blob);return {where:'folder',folder:handle.name,name}}}catch(e){if(e&&e.name==='AbortError')return {where:'cancel'};console.warn('Zápis do priečinka zlyhal',e)}
+  download(name,blob);return {where:'download',name}}
+ /* Výber súboru na import — otvorí sa rovno v priečinku s dátami. Vráti File alebo null; undefined = použi starý výber súboru. */
+ async function pick(accept){if(typeof window.showOpenFilePicker!=='function')return undefined;await ready;try{const [fh]=await window.showOpenFilePicker({id:'palindrom-'+appId+'-open',startIn:handle||'downloads',types:[{description:'Záloha JSON',accept:{'application/json':accept||['.json']}}],multiple:false});return await fh.getFile()}catch(e){return e&&e.name==='AbortError'?null:undefined}}
+ async function change(){if(!supported)return null;try{await choose();await allowed(true);return handle.name}catch(e){return null}}
+ async function forget(){handle=null;await put(null)}
+ return {supported,ready,save,pick,change,forget,ensure,write:async(n,d,m)=>{const b=d instanceof Blob?d:new Blob([d],{type:m||'application/json;charset=utf-8'});await write(n,b)},get name(){return handle?handle.name:''},folderName,
+  message(r){return r.where==='folder'?'Uložené do „'+r.folder+'“ · '+r.name:r.where==='download'?'Uložené do Stiahnutých súborov · '+r.name:'Ukladanie zrušené.'}};
+};
+</script>
+<script data-app>
+'use strict';
+const MODELS = JSON.parse(document.getElementById('catalogData').textContent);
+const SPACES = JSON.parse(document.getElementById('spacesData').textContent);
+const CATALOG = MODELS.concat(SPACES);
+const KEY = 'noir.hf.catalog.v1';
+const DATA_DATE = CATALOG.reduce(function(a,m){return m.checkedAt>a?m.checkedAt:a;},'');
+// Repozitáre premenované na HF: staré ID v zálohách a localStorage sa prevedú na nové.
+const ALIASES = {'abenzerps/Qwen-Image-2.1-Uncensored-GGUF':'abenzerps/Qwen-Image-2.1-Turbo-Quantized','abenzerps/Qwen-Image-2.1-Uncensored-Quantized':'abenzerps/Qwen-Image-2.1-Turbo-Quantized','space:00000tt/LTX-2.3-10Eros':'space:rdata92/LTX-2.3-10Eros','space:multimodalart/Chroma1-HD':'space:NikAgs/Chroma1-HD'};
+function alias(id){return Object.prototype.hasOwnProperty.call(ALIASES,id)?ALIASES[id]:id;}
+function aliasMap(o){const r={};if(o&&typeof o==='object'&&!Array.isArray(o))Object.keys(o).forEach(function(k){const n=alias(k);if(!(n in r)||k===n)r[n]=o[k];});return r;}
+const CATS = {caption:'Obrázok → prompt',image:'Text → obrázok',video:'Video'};
+const TYPES = {space:'Webová appka / Space',model:'Model / checkpoint',quant:'Kvantizovaná verzia',lora:'Doplnok LoRA',tagger:'Tagger'};
+const STAGES = {RUNNING:'Hlási beh',SLEEPING:'Uspaté',PAUSED:'Pozastavené',BUILDING:'Pripravuje sa',STARTING:'Spúšťa sa',RUNNING_BUILDING:'Aktualizuje sa',RUNTIME_ERROR:'Chyba behu',BUILD_ERROR:'Chyba zostavenia',STOPPED:'Zastavené',NO_APP_FILE:'Chýba appka'};
+const STATES = {'':'Nevyskúšané',todo:'Chcem vyskúšať',tested:'Vyskúšané',skip:'Vynechať'};
+// „Čo práve tvoríš?“ — úlohy v bočnom menu (farba = premenná --t-<kľúč>).
+const TASKS = {describe:'Opis a tagy obrázka',t2i:'Obrázok z textu',edit:'Úprava obrázka',i2v:'Obrázok → video',t2v:'Text → video',s2v:'Zvuk → video'};
+const DAY = 864e5, SEC_PER_USD = 600; // HF: kvóta sa obnoví 24 h po prvom použití; nad kvótu 1 $ za 10 min GPU.
+const IDS = new Set(CATALOG.map(function(m){return m.id;}));
+const $ = function(s){return document.querySelector(s);};
+const $$ = function(s){return Array.from(document.querySelectorAll(s));};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function normalize(s){return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
+function compact(n){if(n==null)return '—';return (n>=1000000?(n/1000000).toLocaleString('sk-SK',{maximumFractionDigits:2})+' mil.':n>=1000?(n/1000).toLocaleString('sk-SK',{maximumFractionDigits:1})+' tis.':String(n));}
+function full(n){return n==null?'Nedostupné':n.toLocaleString('sk-SK');}
+function dateLabel(d){if(typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d))return d.slice(8,10)+'. '+d.slice(5,7)+'. '+d.slice(0,4);const t=new Date(d);return Number.isNaN(t.getTime())?'Neznámy dátum':t.toLocaleString('sk-SK',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+const MAX_MINE=500,MAX_CATS=100;
+let mineFilter='all';
+function safeHFLink(raw){
+ try{const u=new URL(String(raw||'').trim());if(u.protocol!=='https:'||u.hostname.toLowerCase()!=='huggingface.co'||u.username||u.password)return null;
+  const bits=u.pathname.split('/').filter(Boolean);if(bits[0]==='spaces'&&bits.length>=3&&bits[1]&&bits[2])return {url:'https://huggingface.co/spaces/'+encodeURIComponent(decodeURIComponent(bits[1]))+'/'+encodeURIComponent(decodeURIComponent(bits[2])),kind:'Space'};
+  if(bits.length>=2&&bits[0]!=='spaces'&&bits[0]!=='datasets'&&bits[0]!=='docs'&&bits[0]!=='settings'&&bits[0]!=='blog'&&bits[0]!=='tasks'&&bits[0]!=='organizations'&&bits[0]!=='login'&&bits[0]!=='join'&&bits[0]!=='api')return {url:'https://huggingface.co/'+encodeURIComponent(decodeURIComponent(bits[0]))+'/'+encodeURIComponent(decodeURIComponent(bits[1])),kind:'Model'};
+ }catch(e){}return null;
+}
+function cleanMineCategories(raw){if(!Array.isArray(raw))return [];let out=[],seen=new Set();for(const c of raw.slice(0,MAX_CATS)){if(!c||typeof c.name!=='string'||typeof c.id!=='string')continue;const name=c.name.trim().slice(0,65),id=c.id.slice(0,100);if(!name||!id||seen.has(id))continue;seen.add(id);out.push({id,name});}return out;}
+function cleanMineModules(raw,cats){if(!Array.isArray(raw))return [];let out=[],seen=new Set();for(const x of raw.slice(0,MAX_MINE)){if(!x||typeof x!=='object')continue;const link=safeHFLink(x.url);if(!link||seen.has(link.url))continue;seen.add(link.url);let category=cats.some(c=>c.id===x.category)?x.category:'';out.push({id:typeof x.id==='string'&&x.id.length<100?x.id:'mine-'+out.length,url:link.url,kind:link.kind,name:String(x.name||link.url.split('/').pop()).trim().slice(0,120),category,description:String(x.description||'').slice(0,1200)});}return out;}
+function uniqueMineID(){return 'mine-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);}
+function categoryName(id){return (state.mineCategories.find(c=>c.id===id)||{}).name||'Bez kategórie';}
+function renderMine(){
+ const select=$('#mineCategory');if(!['all','uncategorized'].includes(mineFilter)&&!state.mineCategories.some(c=>c.id===mineFilter))mineFilter='all';
+ select.innerHTML='<option value="all">Všetky kategórie</option><option value="uncategorized">Bez kategórie</option>'+state.mineCategories.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('');select.value=mineFilter;
+ const items=state.mineModules.filter(m=>mineFilter==='all'||(mineFilter==='uncategorized'&&!m.category)||m.category===mineFilter);
+ $('#mineCards').innerHTML=items.map(m=>'<article class="card"><div class="card-top"><span class="category-label">'+esc(categoryName(m.category))+'</span><span class="tag">'+esc(m.kind)+'</span></div><h3>'+esc(m.name)+'</h3><p class="repo-owner mine-card-link">'+esc(m.url)+'</p><p class="card-desc">'+esc(m.description||'Tvoj vlastný modul z Hugging Face')+'</p><a class="btn primary card-launch" href="'+esc(m.url)+'" target="_blank" rel="noopener noreferrer">Otvoriť na HF ↗</a><div class="card-actions"><button class="btn small" data-action="edit-mine" data-id="'+esc(m.id)+'">Upraviť</button><button class="btn small ghost" data-action="delete-mine" data-id="'+esc(m.id)+'">Odstrániť</button></div></article>').join('');
+ $('#mineEmpty').hidden=items.length>0;$('#mineEmpty h3').textContent=state.mineModules.length?'V tejto kategórii zatiaľ nič nie je.':'Zatiaľ nemáš vlastné moduly.';
+ $('#mineCategories').innerHTML=state.mineCategories.length?'<h3 style="font-size:13px;margin:25px 0 10px">Správa kategórií</h3><div class="mine-tags">'+state.mineCategories.map(c=>'<span class="mine-cat-pill">'+esc(c.name)+' <button data-action="delete-category" data-id="'+esc(c.id)+'" aria-label="Odstrániť kategóriu '+esc(c.name)+'" title="Odstrániť kategóriu (moduly zostanú)">×</button></span>').join('')+'</div>':'';
+}
+function openCategoryEditor(){openModal('Nová kategória','Napríklad AUDIO, VIDEO, IMAGE, MASTERING…','<form id="mineCategoryForm"><label class="field">Názov kategórie<input class="mine-input" id="newMineCategory" required maxlength="65" placeholder="Napríklad AUDIO" autocomplete="off"></label><div class="backup-row"><button class="btn primary" type="submit">Vytvoriť kategóriu</button></div></form>',false);$('#newMineCategory').focus();$('#mineCategoryForm').addEventListener('submit',function(e){e.preventDefault();const name=$('#newMineCategory').value.trim();if(!name)return;if(state.mineCategories.length>=MAX_CATS){toast('Dosiahnutý limit kategórií.');return;}if(state.mineCategories.some(c=>normalize(c.name)===normalize(name))){toast('Táto kategória už existuje.');return;}const id=uniqueMineID();state.mineCategories.push({id,name});persist();mineFilter=id;closeModal();showView('mine');toast('Kategória vytvorená.');});}
+function openMineEditor(id){const item=state.mineModules.find(m=>m.id===id);const options='<option value="">Bez kategórie</option>'+state.mineCategories.map(c=>'<option value="'+esc(c.id)+'" '+(item&&item.category===c.id?'selected':'')+'>'+esc(c.name)+'</option>').join('');
+ openModal(item?'Upraviť HF modul':'Pridať HF modul','Vlož adresu konkrétneho Space alebo modelu na huggingface.co','<form id="mineForm"><label class="field">Odkaz na HF modul *<input class="mine-input" id="mineUrl" type="url" required placeholder="https://huggingface.co/spaces/autor/modul" value="'+esc(item?item.url:'')+'"></label><label class="field">Názov modulu<input class="mine-input" id="mineName" maxlength="120" placeholder="Doplní sa z odkazu" value="'+esc(item?item.name:'')+'"></label><label class="field">Kategória<select class="mine-input" id="mineCat">'+options+'</select></label><label class="field">Popis / poznámka<textarea id="mineDesc" maxlength="1200" placeholder="Čo modul robí, na čo ho používam…">'+esc(item?item.description:'')+'</textarea></label><p class="field-hint">Vkladaj iba odkazy na konkrétne Hugging Face Spaces alebo modelové repozitáre. NOIR len ukladá odkaz, neinštaluje nástroj.</p><div class="backup-row"><button class="btn primary" type="submit">'+(item?'Uložiť zmeny':'Pridať do NOIR')+'</button></div></form>',false);
+ $('#mineUrl').focus();$('#mineForm').addEventListener('submit',function(e){e.preventDefault();const link=safeHFLink($('#mineUrl').value);if(!link){toast('Zadaj platný odkaz na HF Space alebo model.');return;}if(state.mineModules.some(m=>m.url===link.url&&m.id!==id)){toast('Tento HF modul už máš uložený.');return;}if(!item&&state.mineModules.length>=MAX_MINE){toast('Dosiahnutý limit 500 modulov.');return;}const record={id:item?item.id:uniqueMineID(),url:link.url,kind:link.kind,name:($('#mineName').value.trim()||decodeURIComponent(link.url.split('/').pop())).slice(0,120),category:$('#mineCat').value,description:$('#mineDesc').value.trim()};if(item)Object.assign(item,record);else state.mineModules.push(record);persist();mineFilter='all';closeModal();showView('mine');toast('Modul uložený do NOIR.');});}
+function deleteMine(id){const m=state.mineModules.find(m=>m.id===id);if(!m||!confirm('Odstrániť modul „'+m.name+'“ z NOIR?'))return;state.mineModules=state.mineModules.filter(x=>x.id!==id);persist();render();toast('Modul odstránený.');}
+function deleteMineCategory(id){const cat=state.mineCategories.find(c=>c.id===id);if(!cat||!confirm('Odstrániť kategóriu „'+cat.name+'“? Moduly zostanú v Bez kategórie.'))return;state.mineCategories=state.mineCategories.filter(c=>c.id!==id);state.mineModules.forEach(m=>{if(m.category===id)m.category='';});mineFilter='all';persist();render();toast('Kategória odstránená; moduly zostali.');}
+function cleanPersonal(raw){
+ if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('Neplatné údaje.');
+ raw=Object.assign({},raw,{notes:aliasMap(raw.notes),status:aliasMap(raw.status),metrics:aliasMap(raw.metrics),gpu:aliasMap(raw.gpu),favorites:Array.isArray(raw.favorites)?raw.favorites.map(function(x){return typeof x==='string'?alias(x):x;}):raw.favorites});
+ const r={favorites:[],notes:{},status:{},theme:raw.theme==='light'?'light':'dark',metrics:{},credit:defaultCredit(),gpu:{},mineCategories:[],mineModules:[]};
+ r.mineCategories=cleanMineCategories(raw.mineCategories);r.mineModules=cleanMineModules(raw.mineModules,r.mineCategories);
+ if(Array.isArray(raw.favorites))r.favorites=Array.from(new Set(raw.favorites.filter(function(x){return typeof x==='string'&&IDS.has(x);})));
+ CATALOG.forEach(function(m){
+  if(raw.notes&&typeof raw.notes[m.id]==='string')r.notes[m.id]=raw.notes[m.id].slice(0,8000);
+  if(raw.status&&Object.prototype.hasOwnProperty.call(STATES,raw.status[m.id]))r.status[m.id]=raw.status[m.id];
+  const x=raw.metrics&&raw.metrics[m.id];
+  if(x&&Number.isSafeInteger(x.likes)&&x.likes>=0&&typeof x.at==='string'&&!Number.isNaN(Date.parse(x.at))){
+   if(m.type==='space'&&typeof x.stage==='string'&&/^[A-Z_]{1,50}$/.test(x.stage))r.metrics[m.id]={downloads:null,likes:x.likes,stage:x.stage,at:x.at,hw:['zero','cpu','gpu'].includes(x.hw)?x.hw:undefined};
+   else if(m.type!=='space'&&Number.isSafeInteger(x.downloads)&&x.downloads>=0)r.metrics[m.id]={downloads:x.downloads,likes:x.likes,at:x.at};
+  }
+  const g=raw.gpu&&raw.gpu[m.id];
+  if(m.type==='space'&&Number.isFinite(g)&&g>=0&&g<=900)r.gpu[m.id]=Math.round(g);
+ });
+ const c=raw.credit;
+ if(c&&typeof c==='object'&&!Array.isArray(c)){
+  if(Number.isFinite(c.limit)&&c.limit>=1&&c.limit<=1440)r.credit.limit=Math.round(c.limit);
+  if(typeof c.start==='string'&&!Number.isNaN(Date.parse(c.start)))r.credit.start=c.start;
+  if(Array.isArray(c.log))r.credit.log=c.log.filter(function(x){return x&&typeof x.at==='string'&&!Number.isNaN(Date.parse(x.at))&&Number.isFinite(x.sec)&&Math.abs(x.sec)<=86400&&typeof x.id==='string';}).slice(-300).map(function(x){return {at:x.at,id:alias(x.id).slice(0,160),sec:Math.round(x.sec),n:Number.isSafeInteger(x.n)&&x.n>=0&&x.n<=100?x.n:0};});
+  if(!r.credit.start)r.credit.log=[];
+ }
+ return r;
+}
+function defaultCredit(){return {limit:40,start:null,log:[]};}
+let state={favorites:[],notes:{},status:{},theme:'dark',metrics:{},credit:defaultCredit(),gpu:{},mineCategories:[],mineModules:[]};
+let storageOK=true;
+try{const raw=localStorage.getItem(KEY);if(raw)state=cleanPersonal(JSON.parse(raw));}catch(e){storageOK=false;}
+let view='apps',task='all',query='',type='all',sort='likes',runtimeFilter='running',compare=[];
+let session=null; // appka otvorená z NOIR, ku ktorej sa zapisuje spotreba GPU
+let lastFocus=null,toastTimer=null,refreshBusy=false,detailID=null;
+// Account credentials are deliberately kept outside persisted state and backups.
+// Only the fixed official HF identity endpoint receives a token.
+let hfSession=null,accountRequest=null;
+const HF_WHOAMI='https://huggingface.co/api/whoami-v2';
+function persist(){
+ try{localStorage.setItem(KEY,JSON.stringify(state));storageOK=true;}catch(e){storageOK=false;}
+ $('#storageWarning').hidden=storageOK;
+}
+function metric(m){
+ const base={downloads:m.downloads,likes:m.likes,stage:m.stage,at:m.checkedAt,hw:m.hw};
+ const x=state.metrics[m.id];
+ // Uložené údaje platia iba vtedy, ak sú novšie než údaje zabudované v súbore.
+ if(!x||Date.parse(x.at)<Date.parse(m.checkedAt+'T00:00:00'))return base;
+ return x;
+}
+function spaceURL(m){return 'https://huggingface.co/spaces/'+m.spaceId;}
+function entryURL(m){return m.type==='space'?spaceURL(m):'https://huggingface.co/'+m.id;}
+function stageLabel(m){return STAGES[metric(m).stage]||'Stav neznámy';}
+function running(m){return metric(m).stage==='RUNNING';}
+function launchLabel(m){return running(m)?'Spustiť appku':metric(m).stage==='SLEEPING'?'Otvoriť uspatú appku':'Otvoriť stav na HF';}
+function getModel(id){return CATALOG.find(function(m){return m.id===id;});}
+function getSpace(spaceId){return SPACES.find(function(m){return m.spaceId===spaceId;});}
+// ---------- ZeroGPU kvóta ----------
+// Presný zostatok: rovnako ako Audio Atlas — HF endpoint /api/spaces/zero-gpu/quota s kľúčom „Read billing usage“.
+// NOIR má vlastné úložisko kľúča (noir.keys). Ak tam kľúč nie je, len si prečíta úzky kľúč z Audio Atlasu
+// (Billing · Read billing usage) — do Atlasu nikdy nič nezapisuje.
+// Bez kľúča (alebo offline) NOIR pokračuje odhadom zo zápisov: generovania × sekundy GPU.
+const CKEY='noir.keys',CRED='noir.credits',ATLAS_KEYS='audio.atlas.keys',HF_QUOTA='https://huggingface.co/api/spaces/zero-gpu/quota';
+function readJSON(k){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v&&typeof v==='object'&&!Array.isArray(v)?v:{};}catch(e){return {};}}
+function writeJSON(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
+function validLive(d){return Boolean(d&&Number.isFinite(d.base)&&d.base>0&&Number.isFinite(d.remaining)&&typeof d.at==='string'&&!Number.isNaN(Date.parse(d.at)));}
+function loadKeys(){const own=readJSON(CKEY);if(typeof own.hf==='string'&&own.hf)return {hf:own.hf,from:'noir'};const at=readJSON(ATLAS_KEYS);return typeof at.hf==='string'&&at.hf?{hf:at.hf,from:'atlas'}:{};}
+let keys=loadKeys(),live=readJSON(CRED).hf||null,liveErr=null,liveBusy=false,liveLast=0;
+if(!validLive(live))live=null;
+function hwOf(m){return metric(m).hw||m.hw||'zero';}
+function usesQuota(m){return m.type==='space'&&hwOf(m)==='zero';}
+function gpuSec(m){return Object.prototype.hasOwnProperty.call(state.gpu,m.id)?state.gpu[m.id]:(m.gpuSec||0);}
+function liveReset(){return live&&live.resetsAt&&!Number.isNaN(Date.parse(live.resetsAt))?Date.parse(live.resetsAt):null;}
+function creditCheck(){
+ const c=state.credit;
+ if(live){const r=liveReset();if(r&&Date.now()>=r){live={base:live.base,remaining:live.base,resetsAt:null,over:0,at:new Date().toISOString()};c.log=[];c.start=null;persist();return true;}return false;}
+ if(c.start&&Date.now()>=Date.parse(c.start)+DAY){c.start=null;c.log=[];persist();return true;}return false;
+}
+function logSum(){return state.credit.log.reduce(function(a,x){return a+x.sec;},0);}
+function creditBase(){return live?live.base:state.credit.limit*60;}
+function creditLeft(){creditCheck();return live?live.remaining-(live.over||0)-logSum():state.credit.limit*60-logSum();}
+function fmtSec(sec){const neg=sec<0;sec=Math.abs(Math.round(sec));return (neg?'−':'')+Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');}
+function usd(sec){return (Math.max(0,sec)/SEC_PER_USD).toLocaleString('sk-SK',{style:'currency',currency:'USD'});}
+function whenLabel(t){const d=new Date(t);if(Number.isNaN(d.getTime()))return '';const tm=d.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'});return d.toDateString()===new Date().toDateString()?'dnes '+tm:d.getDate()+'. '+(d.getMonth()+1)+'. '+tm;}
+function resetLabel(){
+ const t=live?liveReset():(state.credit.start?Date.parse(state.credit.start)+DAY:null);
+ if(!t)return live?'Kvóta je celá — dnes si ju ešte nečerpal':'Obnova 24 h po prvom použití GPU';
+ const tot=Math.max(1,Math.round((t-Date.now())/60000)),h=Math.floor(tot/60),mi=tot%60;
+ return 'Obnoví sa o '+[h?h+' h':'',mi?mi+' min':''].filter(Boolean).join(' ')+' ('+whenLabel(t)+')';
+}
+function sourceLabel(){
+ if(!live)return keys.hf?(liveErr||'Načítavam z HF…'):'Odhad zo zápisov';
+ if(liveBusy)return 'Overujem na HF…';
+ return (liveErr?liveErr+' · stav z ':'Presne z HF · ')+whenLabel(live.at)+(logSum()?' + tvoje zápisy':'');
+}
+function gpuText(m){
+ const k=hwOf(m);
+ if(k==='cpu')return {cls:'',text:'CPU / služba prevádzkovateľa · nečerpá tvoju kvótu'};
+ if(k==='gpu')return {cls:'',text:'Vlastný GPU prevádzkovateľa · nečerpá tvoju kvótu'};
+ const sec=gpuSec(m),left=creditLeft();
+ return {cls:'zero'+(left<sec?' low':''),text:'ZeroGPU · ≈ '+sec+' s na generovanie'+(left<sec?' · kvóta došla, ide z kreditov':'')};
+}
+async function getJSON(url,headers){const c=new AbortController(),timer=setTimeout(function(){c.abort();},10000);try{const r=await fetch(url,{headers:headers,credentials:'omit',cache:'no-store',signal:c.signal});if(!r.ok){const e=new Error('http');e.code=r.status;throw e;}return await r.json();}finally{clearTimeout(timer);}}
+function errText(e){if(e&&e.code===401)return 'Kľúč neplatí. Vytvor nový v nastaveniach HF.';if(e&&e.code===403)return 'Kľúču chýba povolenie Read billing usage.';if(e&&e.code===429)return 'HF je zahltený, skús o chvíľu.';if(e&&e.code)return 'HF vrátil chybu '+e.code+'.';if(e&&e.message==='format')return 'HF poslal neznámy formát.';return 'Bez pripojenia';}
+async function refreshQuota(){
+ if(!keys.hf||liveBusy)return false;
+ liveBusy=true;liveLast=Date.now();renderCredit();
+ let ok=false;
+ try{
+  const d=await getJSON(HF_QUOTA,{Authorization:'Bearer '+keys.hf});
+  if(!Number.isFinite(d.base)||!Number.isFinite(d.current))throw new Error('format');
+  live={base:d.base,remaining:Math.max(0,d.current),resetsAt:typeof d.resetsAt==='string'?d.resetsAt:null,over:Number.isFinite(d.overquotaUsed)?d.overquotaUsed:0,at:new Date().toISOString()};
+  writeJSON(CRED,{hf:live});
+  state.credit.log=[];state.credit.limit=Math.round(d.base/60);state.credit.start=liveReset()?new Date(liveReset()-DAY).toISOString():null;persist();
+  liveErr=null;ok=true;
+ }catch(e){liveErr=errText(e);}
+ liveBusy=false;render();
+ if(!$('#modalOverlay').hidden&&$('#creditModal'))openCredit();
+ return ok;
+}
+function spend(id,sec,n){
+ creditCheck();const c=state.credit;
+ if(!c.start&&!live)c.start=new Date().toISOString();
+ c.log.push({at:new Date().toISOString(),id:id,sec:Math.round(sec),n:n||0});
+ persist();render();
+ const left=creditLeft();
+ toast('Odpočítané '+fmtSec(sec)+' min · '+(left<0?'nad limit '+fmtSec(-left)+' (≈ '+usd(-left)+')':'zostáva '+fmtSec(left)+' min'));
+}
+function undoSpend(){
+ const c=state.credit;if(!c.log.length){toast('Nie je čo vrátiť.');return;}
+ const x=c.log.pop();if(!c.log.length&&!live)c.start=null;persist();render();toast('Vrátené '+fmtSec(x.sec)+' min.');
+}
+function renderCredit(){
+ const left=creditLeft(),lim=creditBase(),pct=Math.max(0,Math.min(100,left/lim*100));
+ const low=left<300,over=left<0;
+ const card=$('#creditCard');
+ card.classList.toggle('low',low);card.classList.toggle('over',over);
+ card.innerHTML='<div class="credit-head"><span>HF ZeroGPU</span><b>'+(live?'denne':'odhad')+'</b></div>'+
+  '<div class="credit-num"><b>'+fmtSec(left)+'</b><span>'+(over?'min nad limit':'min z '+Math.round(lim/60))+'</span></div>'+
+  '<div class="credit-bar" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(pct)+'" aria-label="Zostávajúca ZeroGPU kvóta"><i style="width:'+pct.toFixed(1)+'%"></i></div>'+
+  '<div class="credit-meta">'+(over?'≈ '+esc(usd(-left))+' z kreditov · ':'')+esc(resetLabel())+'</div><div class="credit-meta">'+(keys.hf?esc(sourceLabel()):'<span class="credit-link">Pridať kľúč</span> → presný zostatok')+'</div>';
+ const qb=$('#quotaRefresh');qb.disabled=liveBusy||!keys.hf;qb.textContent=liveBusy?'Overujem…':'↻ Obnoviť stav';
+ renderSession();
+}
+function startSession(spaceId){
+ const m=getSpace(spaceId);if(!m)return;
+ if(!usesQuota(m)){toast(m.name+' beží bez ZeroGPU — kvótu nečerpá.');return;}
+ session={id:m.id,at:Date.now(),before:creditLeft()};renderSession();
+ toast(m.name+' sa otvára v novej karte. '+(keys.hf?'Po návrate NOIR načíta z HF, koľko minula.':'Po návrate zapíš dole počet generovaní.'));
+}
+function renderSession(){
+ const bar=$('#sessionBar');const m=session&&getModel(session.id);
+ if(!m){bar.hidden=true;bar.innerHTML='';return;}
+ const sec=gpuSec(m),left=creditLeft(),used=Math.max(0,session.before-left);
+ bar.hidden=false;
+ if(keys.hf){
+  bar.innerHTML='<div class="session-info"><b>'+esc(m.short||m.name)+' je otvorené</b><span>'+(liveBusy?'Overujem na HF…':'Zatiaľ minulo '+fmtSec(used)+' min · zostáva '+fmtSec(left)+' min')+'</span></div>'+
+   '<div class="session-actions"><button class="btn primary small" data-action="quota-refresh"'+(liveBusy?' disabled':'')+'>↻ Overiť na HF</button><button class="icon-btn" data-action="end-session" aria-label="Zavrieť lištu odpočtu">×</button></div>';
+  return;
+ }
+ bar.innerHTML='<div class="session-info"><b>'+esc(m.short||m.name)+' · koľko generovaní?</b><span>≈ '+sec+' s GPU na jedno · zostáva '+fmtSec(left)+' min</span></div>'+
+  '<div class="session-actions"><button class="btn primary small" data-spend="1">−1</button><button class="btn small" data-spend="2">−2</button><button class="btn small" data-spend="3">−3</button><button class="btn small" data-spend="5">−5</button>'+
+  '<button class="btn small ghost" data-action="credit" data-pre="'+esc(m.id)+'">Iné…</button><button class="icon-btn" data-action="end-session" aria-label="Zavrieť lištu odpočtu">×</button></div>';
+}
+function openCredit(preId){
+ detailID=null;
+ const left=creditLeft(),c=state.credit;
+ const apps=SPACES.filter(usesQuota).sort(function(a,b){return a.name.localeCompare(b.name,'sk');});
+ const pre=apps.some(function(m){return m.id===preId;})?preId:(session&&session.id)||(apps[0]&&apps[0].id);
+ const log=c.log.slice().reverse().map(function(x){const m=getModel(x.id);return '<li><span>'+esc(new Date(x.at).toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'}))+' · '+esc(x.id==='manual'?'Prepis podľa HF':m?(m.short||m.name):x.id)+(x.n?' · '+x.n+'×':'')+'</span><b>'+(x.id==='manual'?'spolu ':'−')+fmtSec(x.sec)+'</b></li>';}).join('');
+ const keyBox=keys.hf?
+  '<div class="quick-row"><button class="btn primary" data-action="quota-refresh"'+(liveBusy?' disabled':'')+'>'+(liveBusy?'Overujem…':'↻ Obnoviť z HF')+'</button><button class="btn ghost" data-action="quota-key">Kľúč</button>'+external('https://huggingface.co/settings/billing','Spotreba na HF')+'</div>'+(liveErr?'<p class="account-error">'+esc(liveErr)+'</p>':''):
+  '<div class="notice"><strong>Presný zostatok ako v Audio Atlase.</strong> Pridaj kľúč HF s jediným povolením „Read billing usage“ a NOIR bude čítať zostatok priamo z Hugging Face — aj po každom návrate z appky.</div><div class="quick-row"><button class="btn primary" data-action="quota-key">Pridať kľúč</button></div>';
+ const manual='<div class="detail-section"><h3>'+(keys.hf?'Ručný zápis (keď si offline)':'Zapísať generovanie')+'</h3><label class="field">Appka<select id="spendApp">'+apps.map(function(m){return '<option value="'+esc(m.id)+'"'+(m.id===pre?' selected':'')+'>'+esc(m.name)+' · ≈ '+gpuSec(m)+' s</option>';}).join('')+'</select></label>'+
+  '<div class="field-row"><label class="field">Počet generovaní<input type="number" id="spendN" min="1" max="100" value="1"></label><label class="field">Sekúnd GPU na jedno<input type="number" id="spendSec" min="1" max="900" value="'+(pre?gpuSec(getModel(pre)):60)+'"></label></div>'+
+  '<p class="field-hint">Zmenený odhad sekúnd si NOIR zapamätá pre túto appku.'+(keys.hf?' Pri ďalšom overení na HF sa ručné zápisy nahradia presným stavom.':'')+'</p>'+
+  '<div class="quick-row"><button class="btn" data-action="spend-form">Odpočítať</button><button class="btn ghost" data-action="undo-spend"'+(c.log.length?'':' disabled')+'>Vrátiť posledný zápis</button></div></div>';
+ const override=keys.hf?'':'<div class="detail-section"><h3>Prepísať podľa HF</h3><p>Keď ti HF v appke napíše, koľko ti ostáva, zadaj to sem a NOIR počíta od tohto čísla.</p>'+
+  '<div class="field-row"><label class="field">Zostáva (minúty)<input type="number" id="hfLeft" min="0" max="1440" step="0.5" value="'+Math.max(0,Math.round(left/30)/2)+'"></label><label class="field">Obnova o (voliteľné)<input type="time" id="hfReset"></label></div>'+
+  '<label class="field">Denná kvóta tvojho účtu (minúty)<input type="number" id="hfLimit" min="1" max="1440" value="'+c.limit+'"></label>'+
+  '<div class="quick-row"><button class="btn" data-action="credit-set">Uložiť zostatok</button><button class="btn ghost" data-action="credit-reset">Nová kvóta — vynulovať</button></div></div>';
+ const body='<div id="creditModal"></div><div class="credit-big'+(left<0?' over':'')+'"><b>'+fmtSec(left)+'</b><span>'+(left<0?'min nad limit · ≈ '+esc(usd(-left))+' z kreditov':'min zostáva z '+Math.round(creditBase()/60))+'<br>'+esc(resetLabel())+'<br>'+esc(sourceLabel())+'</span></div>'+
+  keyBox+manual+override+
+  (log?'<div class="detail-section"><h3>Zápisy od posledného overenia</h3><ul class="credit-log">'+log+'</ul></div>':'');
+ openModal('ZeroGPU kvóta','Hugging Face PRO · 40 min denne · obnova 24 h po prvom použití · nad limit 1 $ za 10 min',body,false);
+ $('#spendApp').addEventListener('change',function(){const m=getModel(this.value);if(m)$('#spendSec').value=gpuSec(m);});
+}
+function openKeySetup(){
+ openModal('Kľúč ku kvóte','Uloží sa len v tomto Macu, do zálohy JSON sa nedostane.',
+  '<div class="key-block"><h3>Hugging Face · ZeroGPU</h3><ol class="account-steps"><li>Otvor <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer">huggingface.co/settings/tokens ↗</a> a klikni na <b>Create new token</b>.</li><li>Typ nechaj <b>Fine-grained</b>, meno napr. <b>NOIR a Audio Atlas</b>.</li><li>V časti <b>Billing</b> zaškrtni iba <b>Read billing usage and payment method status</b>. Nič iné netreba.</li><li>Klikni <b>Create token</b>, skopíruj ho (začína na hf_) a vlož sem.</li></ol>'+
+  '<label class="field" for="keyHf">Kľúč Hugging Face<input id="keyHf" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="'+(keys.from==='atlas'?'používa sa kľúč z Audio Atlasu':'hf_…')+'" value="'+esc(keys.from==='noir'?keys.hf:'')+'"></label></div>'+
+  '<p class="field-hint">Kľúč s jediným povolením na čítanie zostatku nevie nič generovať ani meniť. '+(keys.from==='atlas'?'NOIR teraz používa úzky kľúč z Audio Atlasu — nemusíš nič zadávať. Vlastný kľúč sa uloží len do NOIR, Atlas ostane bez zmeny.':'Ak máš kľúč v Audio Atlase, NOIR ho použije sám.')+' Široký kľúč „noir“ sem nedávaj.</p>'+
+  '<div class="account-actions"><button class="btn primary" data-action="quota-save">Uložiť a overiť</button><button class="btn ghost" data-action="quota-clear">Odstrániť kľúč</button></div>',false);
+ $('#keyHf').focus();
+}
+function saveQuotaKey(){
+ const hf=$('#keyHf').value.trim();
+ if(hf&&!/^hf_[A-Za-z0-9]{20,}$/.test(hf)){toast('Kľúč má začínať na hf_ a nemá obsahovať medzery.');$('#keyHf').focus();return;}
+ const all=readJSON(CKEY);if(hf)all.hf=hf;else delete all.hf;
+ if(!writeJSON(CKEY,all)){toast('Kľúč sa nepodarilo uložiť. Prehliadač blokuje ukladanie.');return;}
+ const prev=keys.hf;keys=loadKeys();if(keys.hf!==prev){live=null;liveErr=null;}
+ closeModal();render();
+ if(keys.hf){toast((hf?'Kľúč uložený.':'Používa sa kľúč z Audio Atlasu.')+' Overujem zostatok na HF…');refreshQuota().then(function(ok){if(ok)toast('ZeroGPU: zostáva '+fmtSec(creditLeft())+' min.');});}else toast('Kľúč odstránený. NOIR počíta odhadom.');
+}
+function clearQuotaKey(){writeJSON(CKEY,{});writeJSON(CRED,{});keys=loadKeys();live=null;liveErr=null;closeModal();render();if(keys.hf){toast('Vlastný kľúč odstránený. Ostáva úzky kľúč z Audio Atlasu.');refreshQuota();}else toast('Kľúč odstránený. NOIR počíta odhadom.');}
+function spendFromForm(){
+ const m=getModel($('#spendApp').value),n=parseInt($('#spendN').value,10),sec=parseInt($('#spendSec').value,10);
+ if(!m||!(n>=1&&n<=100)||!(sec>=1&&sec<=900)){toast('Zadaj počet 1–100 a sekundy 1–900.');return;}
+ if(sec!==gpuSec(m))state.gpu[m.id]=sec;
+ spend(m.id,n*sec,n);openCredit(m.id);
+}
+function setCreditFromHF(){
+ const lim=parseInt($('#hfLimit').value,10),leftMin=parseFloat($('#hfLeft').value),t=$('#hfReset').value;
+ if(!(lim>=1&&lim<=1440)||!(leftMin>=0&&leftMin<=lim)){toast('Zostatok musí byť medzi 0 a dennou kvótou.');return;}
+ const c=state.credit,now=new Date();c.limit=lim;
+ if(/^\d{2}:\d{2}$/.test(t)){const d=new Date();d.setHours(+t.slice(0,2),+t.slice(3,5),0,0);if(d<=now)d.setTime(d.getTime()+DAY);c.start=new Date(d.getTime()-DAY).toISOString();}
+ const used=Math.round(lim*60-leftMin*60);
+ if(used>0){if(!c.start)c.start=now.toISOString();c.log=[{at:now.toISOString(),id:'manual',sec:used,n:0}];}else{c.log=[];if(!/^\d{2}:\d{2}$/.test(t))c.start=null;}
+ persist();render();openCredit();toast('Zostatok uložený: '+fmtSec(lim*60-used)+' min.');
+}
+function resetCredit(){state.credit.start=null;state.credit.log=[];persist();render();openCredit();toast('Kvóta vynulovaná na '+state.credit.limit+' min.');}
+// Položky aktuálnej časti bez filtra úlohy a hľadania — z nich sa počítajú čísla v menu.
+function viewBase(){
+ return CATALOG.filter(function(m){
+  return ((view!=='apps'&&view!=='help')||m.type==='space')&&(view!=='catalog'||m.type!=='space')&&
+   (view!=='apps'||runtimeFilter==='all'||(runtimeFilter==='running'?running(m):!running(m)))&&
+   (view!=='favorites'||state.favorites.includes(m.id))&&
+   (view!=='notes'||Boolean((state.notes[m.id]||'').trim()||state.status[m.id]));
+ });
+}
+function taskLabel(m){return m.tasks.map(function(t){return TASKS[t];}).join(' · ');}
+function renderTasks(){
+ const base=viewBase();
+ const items=[['all','Všetko',base.length]].concat(Object.keys(TASKS).map(function(t){return [t,TASKS[t],base.filter(function(m){return m.tasks.includes(t);}).length];}));
+ $('#taskNav').innerHTML=items.map(function(x){const on=task===x[0]&&view!=='help';return '<button class="task-item'+(on?' active':'')+(x[2]?'':' empty-task')+'" data-task="'+x[0]+'" aria-pressed="'+on+'" style="--tc:var('+(x[0]==='all'?'--accent':'--t-'+x[0])+')"><span class="task-dot" aria-hidden="true"></span><span class="task-name">'+esc(x[1])+'</span><span class="task-count">'+x[2]+'</span></button>';}).join('');
+ $('#taskChips').innerHTML=items.map(function(x){const on=task===x[0];return '<button class="chip'+(on?' active':'')+'" data-task="'+x[0]+'" aria-pressed="'+on+'">'+esc(x[1])+' · '+x[2]+'</button>';}).join('');
+}
+function filteredModels(){
+ const q=normalize(query).trim();
+ const list=viewBase().filter(function(m){
+  return (task==='all'||m.tasks.includes(task))&&(type==='all'||m.type===type)&&
+   (!q||normalize([m.name,m.id,m.description,m.evidence,m.tags.join(' '),taskLabel(m)].join(' ')).includes(q));
+ });
+ list.sort(function(a,b){if(sort==='name')return a.name.localeCompare(b.name,'sk');return (metric(b)[sort]||0)-(metric(a)[sort]||0)||a.name.localeCompare(b.name,'sk');});
+ return list;
+}
+function metadataURL(m){return 'https://huggingface.co/api/'+(m.type==='space'?'spaces/'+m.spaceId:'models/'+m.id);}
+function external(url,label){return '<a class="btn small" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+esc(label)+' <span aria-hidden="true">↗</span></a>';}
+function renderLeaders(){
+ $('#leaderRows').innerHTML=['caption','image','video'].map(function(cat,i){
+  const m=SPACES.filter(function(x){return x.cat===cat&&running(x);}).sort(function(a,b){return metric(b).likes-metric(a).likes;})[0];
+  if(!m)return '<div class="feature-row"><span class="feature-number">0'+(i+1)+'</span><div><strong>'+esc(CATS[cat])+'</strong><small>Žiadna appka práve nehlási beh.</small></div></div>';
+  return '<a class="feature-row" data-launch-space="'+esc(m.spaceId)+'" href="'+esc(spaceURL(m))+'" target="_blank" rel="noopener noreferrer"><span class="feature-number '+cat+'-color">0'+(i+1)+'</span><div><strong>'+esc(m.name)+'</strong><small>'+esc(CATS[cat])+' · Otvoriť appku</small></div><span class="arrow" aria-hidden="true">↗</span></a>';
+ }).join('');
+}
+function launchMarkup(m){
+ if(m.type==='space'){const g=gpuText(m);return '<p class="gpu-line '+g.cls+'">'+esc(g.text)+'</p><a class="btn '+(running(m)?'primary ':'')+'card-launch" data-launch-space="'+esc(m.spaceId)+'" href="'+esc(spaceURL(m))+'" target="_blank" rel="noopener noreferrer">'+esc(launchLabel(m))+' ↗</a>';}
+ const demo=m.demoId?getModel(m.demoId):null,alt=!demo&&m.altId?getModel(m.altId):null;
+ if(demo){const g=gpuText(demo);return '<p class="gpu-line '+g.cls+'">'+esc(g.text)+'</p><a class="btn '+(running(demo)?'primary ':'')+'card-launch" data-launch-space="'+esc(demo.spaceId)+'" href="'+esc(spaceURL(demo))+'" target="_blank" rel="noopener noreferrer">'+esc(running(demo)?'Spustiť appku s týmto modelom':stageLabel(demo)+' · detail HF')+' ↗</a>'+
+  '<a class="btn card-launch" href="'+esc(entryURL(m))+'" target="_blank" rel="noopener noreferrer">Model a súbory ↗</a>';}
+ if(alt)return '<a class="btn alt card-launch" data-launch-space="'+esc(alt.spaceId)+'" href="'+esc(spaceURL(alt))+'" target="_blank" rel="noopener noreferrer">Podobná appka: '+esc(alt.short||alt.name)+' ↗</a>'+
+  '<a class="btn card-launch" href="'+esc(entryURL(m))+'" target="_blank" rel="noopener noreferrer">Model a súbory ↗</a><p class="card-link-hint">Presné demo tohto modelu na HF nie je. '+esc(m.altNote||'')+'</p>';
+ return '<a class="btn card-launch" href="'+esc(entryURL(m))+'" target="_blank" rel="noopener noreferrer">Model a súbory ↗</a><p class="card-link-hint">Webové demo tohto modelu na HF nie je.</p>';
+}
+function render(){
+ document.documentElement.dataset.theme=state.theme;
+ $('#themeButton').setAttribute('aria-label','Prepnúť na '+(state.theme==='dark'?'svetlý':'tmavý')+' vzhľad');
+ $('#favCount').textContent=state.favorites.length;
+ $('#navTotal').textContent=MODELS.length;
+ $('#navApps').textContent=SPACES.length;
+ renderTasks();renderCredit();
+ $('#helpDate').textContent='Adresy, verzie a stav boli overené '+dateLabel(DATA_DATE)+' z verejného HF API a zdrojov autorov. Generovanie výstupov nebolo testované.';
+ $$('.nav-item').forEach(function(el){el.classList.toggle('active',el.dataset.view===view);if(el.dataset.view===view)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
+ $('#helpSection').hidden=view!=='help';$('#catalogSection').hidden=view==='help'||view==='mine';$('#mineSection').hidden=view!=='mine';$('#mineCount').textContent=state.mineModules.length;if(view==='mine')renderMine();
+ $('#sectionTitle').textContent=view==='apps'?'Webové appky':view==='favorites'?'Tvoje obľúbené':view==='notes'?'Moje poznámky a testy':'Modely a súbory';
+ $('#sectionSubtitle').textContent=view==='apps'?'Kliknutie otvorí priamo HF Space.':view==='notes'?'Appky aj modely s tvojím záznamom.':view==='catalog'?'Výber '+MODELS.length+' modelových repozitárov.':'Tvoj výber appiek a modelov.';
+ $('#runtimeFilter').hidden=view!=='apps';$('#typeFilter').hidden=view==='apps';
+ $('#refreshButton').textContent=view==='catalog'?'↻ Obnoviť štatistiky':view==='apps'?'↻ Obnoviť dostupnosť':'↻ Obnoviť údaje';
+ const dl=$('#sort option[value="downloads"]');dl.hidden=view==='apps';dl.disabled=view==='apps';
+ $('#catalogDisclosure').textContent=view==='catalog'?'Stiahnutia sa vzťahujú na konkrétny modelový repozitár. Neznamenajú počet používateľov webovej appky. Verejné demo presného modelu je priradené iba tam, kde sa podarilo overiť zhodu.':'Stav a lajky pochádzajú z HF API; dátum kontroly je na každej karte. Stav „Hlási beh“ potvrdzuje beh rozhrania, nie úspech generovania. Môžu platiť fronty, kvóty a pravidlá prevádzkovateľa. Výstupy generovania neboli testované.';
+ const models=filteredModels(),total=view==='apps'?SPACES.length:view==='catalog'?MODELS.length:CATALOG.length;
+ $('#resultCount').textContent=models.length+' / '+total+(view==='apps'?' appiek':' položiek');
+ $('#cards').innerHTML=models.map(function(m){
+  const stats=metric(m),fav=state.favorites.includes(m.id),chosen=compare.includes(m.id),isApp=m.type==='space';
+  const note=state.notes[m.id]||'';
+  const metrics=isApp?'<span class="runtime-badge '+(running(m)?'running':'unavailable')+'">'+esc(stageLabel(m))+'</span><span class="likes" title="Lajky konkrétneho Space">♡ '+full(stats.likes)+'</span>':'<span class="likes" title="Stiahnutia za posledný mesiac">↓ '+compact(stats.downloads)+' / mesiac</span><span class="likes">♡ '+full(stats.likes)+'</span>';
+  return '<article class="card'+(chosen?' comparing':'')+'" data-id="'+esc(m.id)+'">'+
+   '<div class="card-top"><span class="category-label" style="color:var(--t-'+m.tasks[0]+')">'+esc(taskLabel(m))+'</span><button class="star'+(fav?' on':'')+'" data-favorite="'+esc(m.id)+'" aria-pressed="'+fav+'" aria-label="'+(fav?'Odobrať z obľúbených: ':'Pridať k obľúbeným: ')+esc(m.name)+'">'+(fav?'★':'☆')+'</button></div>'+
+   '<h3><a href="'+esc(entryURL(m))+'" target="_blank" rel="noopener noreferrer" title="'+(isApp?'Otvoriť webovú appku':'Otvoriť model a súbory')+'">'+esc(m.name)+'</a></h3><div class="repo-owner">'+esc(isApp?m.spaceId:m.id)+'</div>'+
+   '<p class="card-version">Verzia: '+esc(m.version)+'</p><p class="card-desc">'+esc(m.description)+'</p>'+
+   '<div class="tags"><span class="tag">'+esc(TYPES[m.type])+'</span>'+m.tags.map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join('')+'</div>'+
+   (view==='notes'&&note?'<div class="note-preview">'+esc(note)+'</div>':'')+
+   '<div class="card-metrics">'+metrics+'</div>'+launchMarkup(m)+
+   '<div class="card-actions"><button class="inline-link card-more" data-detail="'+esc(m.id)+'">Čo vie &amp; podrobnosti</button>'+
+   '<label class="compare-toggle"><input type="checkbox" data-compare="'+esc(m.id)+'" '+(chosen?'checked':'')+'> Porovnať</label></div>'+
+   (state.status[m.id]?'<span class="card-status">'+esc(STATES[state.status[m.id]])+'</span>':'')+'</article>';
+ }).join('');
+ if(!models.length)$('#cards').innerHTML='<div class="empty"><h3>'+(view==='favorites'?'Zatiaľ tu nemáš svoj výber.':view==='notes'?'Priestor na tvoje skúsenosti.':'Nič sa nenašlo.')+'</h3><p>'+(view==='favorites'?'Označ appku alebo model hviezdičkou.':view==='notes'?'Otvor Podrobnosti a pridaj poznámku alebo stav.':'Skús kratší názov alebo zmeň filtre.')+'</p><button class="btn" data-action="reset">Zrušiť filtre</button></div>';
+ renderCompareBar();
+}
+function renderCompareBar(){$('#compareBar').hidden=compare.length===0;$('#compareCount').textContent='Vybrané '+compare.length+' / 3';$('#compareButton').disabled=compare.length<2;}
+function toast(message){$('#toast').textContent=message;$('#toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(function(){$('#toast').hidden=true;},3800);}
+function resetFilters(){task='all';query='';type='all';sort=view==='catalog'?'downloads':'likes';runtimeFilter='running';$('#search').value='';$('#typeFilter').value='all';$('#sort').value=sort;$('#runtimeFilter').value=runtimeFilter;}
+function showView(v){view=v;resetFilters();render();}
+function toggleFavorite(id){
+ if(!IDS.has(id))return;
+ state.favorites=state.favorites.includes(id)?state.favorites.filter(function(x){return x!==id;}):state.favorites.concat(id);
+ persist();render();
+}
+function toggleCompare(id,checked){
+ if(checked&&!compare.includes(id)){if(compare.length>=3){toast('Vedľa seba môžeš porovnať najviac 3 moduly.');render();return;}compare.push(id);}
+ else if(!checked)compare=compare.filter(function(x){return x!==id;});
+ render();
+}
+function openModal(title,subtitle,body,wide){
+ cancelAccountRequest();
+ lastFocus=document.activeElement;
+ $('#modal').classList.toggle('wide',Boolean(wide));
+ $('#modalContent').innerHTML='<div class="modal-top"><div><h2 id="modalTitle">'+esc(title)+'</h2>'+(subtitle?'<p>'+esc(subtitle)+'</p>':'')+'</div><button class="icon-btn" data-action="close" aria-label="Zavrieť okno">×</button></div>'+body;
+ $('#modalOverlay').hidden=false;document.body.style.overflow='hidden';$('#modalContent [data-action="close"]').focus();
+}
+function closeModal(){cancelAccountRequest();if($('#modalOverlay').hidden)return;$('#modalOverlay').hidden=true;document.body.style.overflow='';detailID=null;if(lastFocus&&lastFocus.isConnected)lastFocus.focus();}
+function openDetail(id){
+ const m=getModel(id);if(!m)return;
+ const stats=metric(m),isApp=m.type==='space',demo=m.demoId?getModel(m.demoId):null,alt=!demo&&m.altId?getModel(m.altId):null;
+ const sources=isApp?external(spaceURL(m),launchLabel(m))+(m.model?external('https://huggingface.co/'+m.model,'Referenčný model'):'')+external(spaceURL(m)+'/tree/main','Súbory appky'):external(entryURL(m),'Model a dokumentácia')+external(entryURL(m)+'/tree/main','Modelové súbory')+(demo?external(spaceURL(demo),running(demo)?'Spustiť appku s týmto modelom':stageLabel(demo)+' · HF'):'')+(alt?external(spaceURL(alt),'Podobná appka: '+(alt.short||alt.name)):'');
+ const body='<p class="detail-intro">'+esc(m.description)+'</p>'+
+  '<div class="detail-grid"><div class="detail-box"><span class="micro">Vstup → výstup</span><p>'+esc(m.io)+'</p></div><div class="detail-box"><span class="micro">Používaná verzia</span><p>'+esc(m.version)+'</p></div>'+
+  '<div class="detail-box"><span class="micro">'+(isApp?'Stav appky':'Mesačné stiahnutia')+'</span><p>'+(isApp?esc(stageLabel(m)):full(stats.downloads))+' &nbsp; · &nbsp; ♡ '+full(stats.likes)+'</p></div><div class="detail-box"><span class="micro">Overenie údajov</span><p>'+esc(dateLabel(stats.at))+'</p></div>'+
+  (isApp?'<div class="detail-box"><span class="micro">Spotreba kvóty</span><p>'+esc(gpuText(m).text)+'</p></div><div class="detail-box"><span class="micro">Úloha</span><p>'+esc(taskLabel(m))+'</p></div>':'')+'</div>'+
+  (isApp&&usesQuota(m)?'<div class="detail-section"><h3>Odhad GPU na jedno generovanie</h3><label class="field">Sekundy (z kódu appky; uprav podľa skúsenosti)<input type="number" id="gpuEstimate" min="1" max="900" value="'+gpuSec(m)+'"></label></div>':'')+
+  '<div class="detail-section"><h3>Čo vie</h3><p>'+esc(m.capability)+'</p></div>'+
+  '<div class="detail-section"><h3>'+(isApp?'Presná verzia a vzťah k pôvodnému výberu':'Údaje z modelovej karty')+'</h3><p>'+esc(m.evidence)+'</p></div>'+
+  '<div class="detail-section"><h3>Čo zohľadniť</h3><p>'+esc(m.limit)+'</p></div>'+
+  '<div class="source-links">'+sources+external(metadataURL(m),'Metadáta HF')+'<button class="btn small" data-copy="'+esc(m.spaceId||m.id)+'">Kopírovať ID ⧉</button></div>'+
+  '<div class="field-hint">Zdroj: '+(isApp?'Space, jeho konfigurácia a zdroj appky':'modelová karta autora')+' · kontrola '+esc(dateLabel(m.checkedAt))+'. Generovanie výstupov nebolo testované.</div>'+
+  '<div class="detail-section"><h3>Tvoj záznam</h3><label class="field">Stav<select id="modelStatus">'+Object.keys(STATES).map(function(k){return '<option value="'+k+'" '+(state.status[m.id]===k?'selected':'')+'>'+STATES[k]+'</option>';}).join('')+'</select></label>'+
+  '<label class="field">Vlastná poznámka<textarea id="modelNote" maxlength="8000" placeholder="Skúsenosť, rýchlosť, výsledok testovania…">'+esc(state.notes[m.id]||'')+'</textarea></label><p class="field-hint" id="noteSaved">Ukladá sa automaticky v tomto prehliadači.</p></div>';
+ openModal(m.name,m.spaceId||m.id,body,false);detailID=id;
+ $('#modelNote').addEventListener('input',function(){state.notes[id]=this.value;persist();$('#noteSaved').textContent=storageOK?'Poznámka uložená.':'Poznámka je v pamäti; exportuj si zálohu.';if(view==='notes')render();});
+ $('#modelStatus').addEventListener('change',function(){state.status[id]=this.value;persist();render();});
+ if($('#gpuEstimate'))$('#gpuEstimate').addEventListener('change',function(){const v=parseInt(this.value,10);if(v>=1&&v<=900){state.gpu[id]=v;persist();render();toast('Odhad uložený: '+v+' s na generovanie.');}});
+}
+function openComparison(){
+ if(compare.length<2){toast('Označ aspoň dva moduly na porovnanie.');return;}
+ const ms=compare.map(getModel);
+ const rows=[
+  ['Úloha',function(m){return taskLabel(m);}],
+  ['Spotreba kvóty',function(m){return m.type==='space'?gpuText(m).text:'—';}],
+  ['Typ',function(m){return TYPES[m.type];}],
+  ['Vstup → výstup',function(m){return m.io;}],
+  ['Verzia',function(m){return m.version;}],
+  ['Stav Space',function(m){return m.type==='space'?stageLabel(m):'Modelové súbory';}],
+  ['Stiahnutia / mesiac',function(m){return m.type==='space'?'Pre Space sa neuvádzajú':full(metric(m).downloads);}],
+  ['Páči sa mi',function(m){return full(metric(m).likes);}],
+  ['Schopnosti',function(m){return m.capability;}],
+  ['Overené informácie',function(m){return m.evidence;}],
+  ['Obmedzenia',function(m){return m.limit;}]
+ ];
+ let body='<div class="table-wrap"><table><thead><tr><th scope="col">Parameter</th>'+ms.map(function(m){return '<th scope="col">'+esc(m.name)+'</th>';}).join('')+'</tr></thead><tbody>';
+ body+=rows.map(function(row){return '<tr><th scope="row">'+esc(row[0])+'</th>'+ms.map(function(m){return '<td>'+esc(row[1](m))+'</td>';}).join('')+'</tr>';}).join('');
+ body+='</tbody></table></div><p class="field-hint">Štatistiky sa vzťahujú na konkrétne repozitáre. Vyššie číslo nie je hodnotenie kvality.</p>';
+ openModal('Porovnanie modulov','Tvoj výber vedľa seba',body,true);
+}
+function openAccount(){
+ detailID=null;
+ if(hfSession){
+  openModal('Tvoje konto je pripojené','Profil overený priamo cez Hugging Face',
+   '<div class="account-status connected"><span class="dot" aria-hidden="true"></span> Pripojené v tejto otvorenej appke</div>'+
+   '<div class="account-profile"><strong>@'+esc(hfSession.name)+'</strong><p>'+esc(hfSession.fullname||hfSession.name)+'</p><p>Posledné overenie: '+esc(new Date(hfSession.verifiedAt).toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'}))+'</p></div>'+
+   '<p class="detail-intro">Účet máš pripojený bez opustenia katalógu. Poznámky a obľúbené zostávajú uložené v tomto prehliadači.</p>'+
+   '<div class="account-actions"><button class="btn primary" data-action="close">Späť do katalógu</button><button class="btn" id="recheckAccount" data-action="recheck-account">Overiť pripojenie</button><button class="btn ghost" data-action="disconnect-account">Odpojiť od appky</button></div>'+
+   '<p id="accountError" class="account-error" role="alert" hidden></p><p id="accountProgress" class="field-hint" role="status" hidden></p>'+
+   '<div class="notice">Token sa používa iba na overenie profilu a je v pamäti tejto stránky. Obnovenie stránky vyžaduje nové pripojenie. Odpojenie tu ťa neodhlási z webu HF. Modely sa samotným pripojením nespúšťajú.</div>',false);
+  return;
+ }
+ openModal('Voliteľné overenie profilu','Otvorenie webových appiek funguje bez tokenu',
+  '<div class="account-status"><span class="dot" aria-hidden="true"></span> Appka zatiaľ nie je pripojená</div>'+
+  '<p class="detail-intro">Ak chceš otvárať appky, toto okno môžeš zavrieť. Tvoje prihlásenie v prehliadači sa použije priamo na HF. Token nižšie slúži iba na voliteľné zobrazenie mena profilu v NOIR.</p>'+
+  '<ol class="account-steps"><li>V <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer">nastaveniach tokenov HF ↗</a> vytvor samostatný token pre NOIR. Zvoľ <b>Fine-grained</b> s minimálnymi právami alebo <b>Read</b>; práva na zápis nie sú potrebné.</li><li>Skopíruj token a vlož ho do poľa nižšie.</li><li>Klikni na <b>Pripojiť účet</b>. Profil sa zobrazí tu, bez presmerovania.</li></ol>'+
+  '<form id="accountForm" autocomplete="off"><label class="field" for="hfToken">HF prístupový token<input id="hfToken" name="hf-access-token" type="password" placeholder="hf_…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="512" required aria-describedby="tokenHint"></label>'+
+  '<p class="field-hint" id="tokenHint">Token vlož iba do tejto appky, neposielaj ho do chatu. Odosiela sa priamo Hugging Face a ostáva iba v pamäti otvorenej stránky.</p>'+
+  '<div class="account-actions"><button class="btn primary" type="submit" id="connectAccountButton">Pripojiť účet</button><button class="btn ghost" type="button" data-action="close">Pokračovať bez účtu</button></div>'+
+  '<p id="accountError" class="account-error" role="alert" hidden></p><p id="accountProgress" class="field-hint" role="status" hidden></p></form>'+
+  '<div class="notice">Pripojenie overí a zobrazí tvoj profil. Katalóg funguje aj bez účtu. Automatické „Prihlásiť cez HF“ s potvrdením prístupu nie je v tejto lokálnej verzii nakonfigurované.</div>',false);
+ $('#accountForm').addEventListener('submit',function(e){e.preventDefault();connectAccount(false);});
+}
+function renderAccount(){
+ $$('[data-account-label]').forEach(function(el){el.textContent=hfSession?'@'+hfSession.name:'HF profil · voliteľné';el.classList.toggle('account-connected',Boolean(hfSession));el.title=hfSession?'Zobraziť pripojený účet @'+hfSession.name:'Voliteľné overenie profilu. Na otvorenie modulov token nepotrebuješ.';});
+ const sum=$('#accountSummary');if(sum)sum.textContent=hfSession?'Pripojený profil @'+hfSession.name:'Appky otvoríš bez tokenu. HF použije prihlásenie v tvojom prehliadači.';
+}
+function cancelAccountRequest(){
+ if(accountRequest){accountRequest.abort();accountRequest=null;}
+ const input=$('#hfToken');if(input)input.value='';
+}
+function accountError(message){
+ const el=$('#accountError');if(el){el.textContent=message;el.hidden=false;}
+}
+async function connectAccount(recheck){
+ if(accountRequest)return;
+ const input=$('#hfToken');
+ let token=recheck&&hfSession?hfSession.token:input?input.value.trim():'';
+ if(input)input.value='';
+ if(!/^hf_[A-Za-z0-9]{8,500}$/.test(token)){token='';accountError('Vlož platný HF token začínajúci na hf_. Heslo k účtu sem nepatrí.');return;}
+ const controller=new AbortController();accountRequest=controller;
+ const button=$('#connectAccountButton')||$('#recheckAccount');if(button)button.disabled=true;
+ const progress=$('#accountProgress');if(progress){progress.hidden=false;progress.textContent='Overujem profil na Hugging Face…';}
+ const error=$('#accountError');if(error)error.hidden=true;
+ const timer=setTimeout(function(){controller.abort();},15000);
+ try{
+  const response=await fetch(HF_WHOAMI,{method:'GET',headers:{Authorization:'Bearer '+token},mode:'cors',credentials:'omit',cache:'no-store',redirect:'error',signal:controller.signal});
+  if(accountRequest!==controller)return;
+  if(!response.ok){const e=new Error('HF request failed');e.status=response.status;throw e;}
+  const profile=await response.json();
+  if(accountRequest!==controller)return;
+  if(profile.type!=='user'||typeof profile.name!=='string'||!profile.name||profile.name.length>100)throw new Error('Unexpected profile');
+  hfSession={token:token,name:profile.name,fullname:typeof profile.fullname==='string'?profile.fullname.slice(0,200):'',verifiedAt:new Date().toISOString()};
+  accountRequest=null;renderAccount();openAccount();toast('HF účet je pripojený: @'+hfSession.name);
+ }catch(e){
+  if(accountRequest!==controller)return;
+  accountRequest=null;
+  if(recheck){hfSession=null;renderAccount();openAccount();}
+  accountError(e.status===401||e.status===403?'HF token odmietol. Skontroluj ho alebo vytvor nový v nastaveniach HF.':e.status===429?'HF dočasne obmedzil počet overení. Skús to o chvíľu.':e.name==='AbortError'?'Overenie trvalo príliš dlho. Skontroluj pripojenie a skús znova.':'Profil sa nepodarilo overiť. Skontroluj internet a token. Ak prehliadač blokuje spojenie s HF, zobrazí sa táto chyba tiež.');
+ }finally{
+  token='';clearTimeout(timer);
+  if(accountRequest===controller)accountRequest=null;
+  if(button)button.disabled=false;
+  if(progress)progress.hidden=true;
+ }
+}
+function disconnectAccount(){
+ cancelAccountRequest();hfSession=null;renderAccount();openAccount();toast('Účet je odpojený od appky.');
+}
+const DD=PalindromDataDir('noir','Noir data',s=>toast(s));
+function ddLine(){return DD.supported?(DD.name?'Zálohy idú do priečinka „'+DD.name+'“ (súbor NOIR-zaloha.json sa prepisuje).':'Pri prvom exporte vyber priečinok „Noir data“ v Stiahnutých súboroch. NOIR si ho zapamätá.'):'Záloha sa uloží do Stiahnutých súborov.';}
+function openBackup(){
+ openModal('Tvoj výber ide s tebou.','Záloha a prenos medzi prehliadačmi',
+ '<p class="detail-intro">Export obsahuje obľúbené moduly, poznámky, stavy testovania a nastavenie vzhľadu.</p>'+
+ '<div class="backup-row"><button class="btn primary" data-action="export">Exportovať JSON ↓</button><button class="btn" data-action="import">Importovať zálohu ↑</button>'+(DD.supported?'<button class="btn ghost" data-action="dd-change">Zmeniť priečinok</button>':'')+'<button class="btn ghost" data-action="print">Tlačiť aktuálny prehľad</button></div>'+
+ '<div class="notice">Záloha obsahuje aj tvoje odhady GPU a veľkosť dennej kvóty (nie dnešné zápisy). Import zachová existujúce obľúbené a pridá nové. Poznámky a stavy z importu prepíšu iba zodpovedajúce položky. Štatistiky sa zo zálohy neimportujú.</div><p class="field-hint" id="ddLine">'+esc(ddLine())+'</p>',false);DD.ready.then(function(){const l=$('#ddLine');if(l)l.textContent=ddLine();});
+}
+async function copyID(text){
+ let ok=false;
+ try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text);ok=true;}}catch(e){}
+ if(!ok){
+  const input=document.createElement('textarea');input.value=text;input.style.cssText='position:fixed;top:0;left:0;opacity:0;pointer-events:none';document.body.appendChild(input);input.select();
+  try{ok=document.execCommand('copy');}catch(e){}input.remove();
+ }
+ if(ok)toast('ID modulu skopírované.');
+ else{openModal('Skopíruj ID ručne','Prehliadač nepovolil automatické kopírovanie.','<label class="field">ID repozitára<textarea id="manualCopy" readonly>'+esc(text)+'</textarea></label>',false);$('#manualCopy').focus();$('#manualCopy').select();}
+}
+async function exportBackup(){
+ const data={app:'NOIR-HF',version:2,createdAt:new Date().toISOString(),favorites:state.favorites,notes:state.notes,status:state.status,theme:state.theme,gpu:state.gpu,credit:{limit:state.credit.limit},mineCategories:state.mineCategories,mineModules:state.mineModules};
+ const r=await DD.save('NOIR-zaloha.json',JSON.stringify(data,null,2));toast(DD.message(r));const l=$('#ddLine');if(l)l.textContent=ddLine();
+}
+function validateBackup(raw){
+ if(!raw||raw.app!=='NOIR-HF'||![1,2].includes(raw.version)||!Array.isArray(raw.favorites)||!raw.notes||typeof raw.notes!=='object'||Array.isArray(raw.notes)||!raw.status||typeof raw.status!=='object'||Array.isArray(raw.status))throw new Error('Súbor nemá formát zálohy NOIR.');
+ return cleanPersonal(raw);
+}
+function mergeBackup(data){
+ state.favorites=Array.from(new Set(state.favorites.concat(data.favorites)));
+ CATALOG.forEach(function(m){if(Object.prototype.hasOwnProperty.call(data.notes,m.id))state.notes[m.id]=data.notes[m.id];if(Object.prototype.hasOwnProperty.call(data.status,m.id))state.status[m.id]=data.status[m.id];});
+ state.mineCategories=cleanMineCategories(state.mineCategories.concat(data.mineCategories));state.mineModules=cleanMineModules(state.mineModules.concat(data.mineModules),state.mineCategories);
+ state.theme=data.theme;state.gpu=Object.assign({},state.gpu,data.gpu);state.credit.limit=data.credit.limit;persist();render();
+}
+async function refreshStats(){
+ if(refreshBusy)return;
+ const entries=view==='catalog'?MODELS:view==='apps'?SPACES:CATALOG;
+ refreshBusy=true;$('#refreshButton').disabled=true;$('#refreshState').hidden=false;
+ let done=0,good=0;
+ async function one(m){
+  const controller=new AbortController();const timer=setTimeout(function(){controller.abort();},12000);
+  try{
+   const response=await fetch(metadataURL(m),{signal:controller.signal,credentials:'omit',cache:'no-store'});
+   if(!response.ok)throw new Error('HTTP '+response.status);
+   const d=await response.json();
+   // HF niekedy lajky v odpovedi nevráti; vtedy ponecháme posledné známe.
+   const likes=Number.isSafeInteger(d.likes)&&d.likes>=0?d.likes:metric(m).likes;
+   if(m.type==='space'){
+    if(!d.runtime||typeof d.runtime.stage!=='string'||!/^[A-Z_]{1,50}$/.test(d.runtime.stage))throw new Error('Chýba stav Space');
+    const hwRaw=d.runtime.hardware&&(d.runtime.hardware.current||d.runtime.hardware.requested);
+    const hw=typeof hwRaw==='string'?(/^zero/.test(hwRaw)?'zero':/^cpu/.test(hwRaw)?'cpu':'gpu'):hwOf(m);
+    state.metrics[m.id]={downloads:null,likes:likes,stage:d.runtime.stage,at:new Date().toISOString(),hw:hw};
+   }else{
+    if(!Number.isSafeInteger(d.downloads)||d.downloads<0)throw new Error('Chýbajú stiahnutia');
+    state.metrics[m.id]={downloads:d.downloads,likes:likes,at:new Date().toISOString()};
+   }
+   good++;
+  }catch(e){}finally{clearTimeout(timer);done++;$('#refreshState').textContent='Načítavam údaje '+done+' / '+entries.length+'…';}
+ }
+ for(let i=0;i<entries.length;i+=3)await Promise.all(entries.slice(i,i+3).map(one));
+ persist();render();refreshBusy=false;$('#refreshButton').disabled=false;
+ $('#refreshState').textContent=good===entries.length?'Aktualizované údaje všetkých '+entries.length+' položiek.':good?'Aktualizované '+good+' / '+entries.length+'. Ostatné položky si ponechali pôvodné údaje.':'Aktualizácia sa nepodarila. Zostávajú uložené údaje; skontroluj pripojenie alebo skús neskôr.';
+}
+document.addEventListener('click',function(e){
+ const el=e.target.closest('button, a');if(!el)return;
+ if(el.dataset.launchSpace)startSession(el.dataset.launchSpace);
+ if(el.dataset.task){if(view==='help'||view==='mine'){view='apps';resetFilters();}task=el.dataset.task;render();if(window.innerWidth>740)$('#catalogSection').scrollIntoView({behavior:'smooth',block:'start'});return;}
+ if(el.dataset.spend&&session){const m=getModel(session.id);const n=parseInt(el.dataset.spend,10);if(m)spend(m.id,n*gpuSec(m),n);return;}
+ if(el.dataset.view){showView(el.dataset.view);return;}
+ if(el.dataset.detail){openDetail(el.dataset.detail);return;}
+ if(el.dataset.favorite){toggleFavorite(el.dataset.favorite);return;}
+ if(el.dataset.copy){copyID(el.dataset.copy);return;}
+ const a=el.dataset.action;
+ if(a==='close')closeModal();
+ if(a==='credit')openCredit(el.dataset.pre);
+ if(a==='spend-form')spendFromForm();
+ if(a==='undo-spend'){undoSpend();if(!$('#modalOverlay').hidden&&$('#spendApp'))openCredit($('#spendApp').value);}
+ if(a==='credit-set')setCreditFromHF();
+ if(a==='credit-reset')resetCredit();
+ if(a==='end-session'){session=null;renderSession();}
+ if(a==='quota-refresh')refreshQuota().then(function(ok){if(!ok&&liveErr)toast(liveErr);});
+ if(a==='quota-key')openKeySetup();
+ if(a==='quota-save')saveQuotaKey();
+ if(a==='quota-clear')clearQuotaKey();
+ if(a==='account')openAccount();
+ if(a==='recheck-account')connectAccount(true);
+ if(a==='disconnect-account')disconnectAccount();
+ if(a==='backup')openBackup();
+ if(a==='add-category')openCategoryEditor();
+ if(a==='add-module')openMineEditor();
+ if(a==='edit-mine')openMineEditor(el.dataset.id);
+ if(a==='delete-mine')deleteMine(el.dataset.id);
+ if(a==='delete-category')deleteMineCategory(el.dataset.id);
+ if(a==='export')exportBackup();
+ if(a==='import')importPick();if(a==='dd-change')ddChange();
+ if(a==='reset'){if(view==='favorites'||view==='notes')showView('apps');else{resetFilters();if(view==='apps'){runtimeFilter='all';$('#runtimeFilter').value='all';}render();}}
+ if(a==='print'){closeModal();if(view==='help')showView('apps');window.print();}
+});
+document.addEventListener('change',function(e){if(e.target.dataset.compare)toggleCompare(e.target.dataset.compare,e.target.checked);});
+$('#search').addEventListener('input',function(){query=this.value;render();});
+$('#mineCategory').addEventListener('change',function(){mineFilter=this.value;renderMine();});
+$('#typeFilter').addEventListener('change',function(){type=this.value;render();});
+$('#runtimeFilter').addEventListener('change',function(){runtimeFilter=this.value;render();});
+$('#sort').addEventListener('change',function(){sort=this.value;render();});
+$('#themeButton').addEventListener('click',function(){state.theme=state.theme==='dark'?'light':'dark';persist();render();});
+$('#compareButton').addEventListener('click',openComparison);
+$('#clearCompare').addEventListener('click',function(){compare=[];render();});
+$('#modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+async function importFrom(file){
+ try{if(file.size>1048576)throw new Error('Záloha je príliš veľká (limit 1 MB).');const data=validateBackup(JSON.parse(await file.text()));mergeBackup(data);closeModal();toast('Záloha importovaná.');}
+ catch(e){toast('Import sa nepodaril: '+(e instanceof SyntaxError?'neplatný JSON.':e.message));}
+}
+$('#importFile').addEventListener('change',function(){const file=this.files[0];if(file)importFrom(file);});
+async function importPick(){const f=await DD.pick();if(f===undefined){$('#importFile').value='';$('#importFile').click();}else if(f)importFrom(f);}
+async function ddChange(){const n=await DD.change();if(n)toast('Zálohy pôjdu do priečinka „'+n+'“.');const l=$('#ddLine');if(l)l.textContent=ddLine();}
+document.addEventListener('keydown',function(e){
+ if(e.key==='Escape')closeModal();
+ if(!$('#modalOverlay').hidden&&e.key==='Tab'){
+  const items=$$('#modal button:not(:disabled), #modal a[href], #modal input, #modal select, #modal textarea');
+  const first=items[0],last=items[items.length-1];
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+ }
+ if(e.key==='/'&&$('#modalOverlay').hidden&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)&&!e.ctrlKey&&!e.metaKey){e.preventDefault();if(view==='help')showView('apps');$('#search').focus();}
+});
+const refreshButton=document.createElement('button');refreshButton.id='refreshButton';refreshButton.className='btn ghost small';refreshButton.textContent='↻ Obnoviť dostupnosť';refreshButton.title='Vo webových appkách obnoví stav a lajky; v modeloch obnoví stiahnutia a lajky.';
+$('.toolbar').appendChild(refreshButton);refreshButton.addEventListener('click',refreshStats);
+window.addEventListener('pagehide',function(){closeModal();hfSession=null;renderAccount();});
+// Po návrate z karty HF lišta zabliká, aby si nezabudol zapísať generovania.
+// Po návrate z karty HF: s kľúčom NOIR načíta presný zostatok, bez kľúča lišta zabliká na zápis.
+document.addEventListener('visibilitychange',function(){
+ if(document.visibilityState!=='visible')return;
+ if(creditCheck())render();
+ const back=session&&Date.now()-session.at>4000;
+ if(keys.hf&&(back?Date.now()-liveLast>5000:Date.now()-liveLast>600000)){
+  refreshQuota().then(function(ok){
+   if(!ok||!back)return;const m=getModel(session.id);const used=session.before-creditLeft();
+   if(m)toast(m.name+(used>=1?': minulo '+fmtSec(used)+' min':': zatiaľ bez spotreby')+' · zostáva '+fmtSec(creditLeft())+' min');
+  });
+ }
+ if(back&&!keys.hf){const bar=$('#sessionBar');bar.classList.remove('pulse');void bar.offsetWidth;bar.classList.add('pulse');}
+});
+window.addEventListener('online',function(){refreshQuota();});
+setInterval(function(){if(creditCheck())render();else renderCredit();},60000);
+$('#storageWarning').hidden=storageOK;render();renderAccount();refreshQuota();
+</script>
+</body>
+</html>
