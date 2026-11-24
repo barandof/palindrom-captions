@@ -13,7 +13,7 @@
 <meta name="color-scheme" content="dark light">
 <meta name="description" content="NOIR — spúšťač webových appiek Hugging Face s odpočtom dennej ZeroGPU kvóty, výberom podľa toho, čo práve tvoríš, a prehľadom modelových súborov.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://huggingface.co; img-src 'self'; manifest-src 'self'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>NOIR 2.4 — Hugging Face / App Launcher</title>
+<title>NOIR 2.5 — Hugging Face / App Launcher</title>
 <style>
 :root{--bg:#0d0f12;--side:#101215;--panel:#16191e;--panel2:#1c2026;--text:#f0f2ed;--muted:#a4aab3;--subtle:#7f8894;--line:#2b3037;--accent:#c2ee86;--accent-ink:#1b2a0b;--cap:#eeb586;--image:#8cbdff;--video:#c5acf1;--t-describe:#eeb586;--t-t2i:#8cbdff;--t-edit:#e8d48b;--t-i2v:#c5acf1;--t-t2v:#f2a7c9;--t-s2v:#9fe0c6;--warn:#f0a36b;--radius:18px;--shadow:0 20px 70px #0007}
 :root[data-theme="light"]{--bg:#f4f5f0;--side:#fafbf7;--panel:#fff;--panel2:#eef0e9;--text:#1d241d;--muted:#60695f;--subtle:#717b70;--line:#d8dfd3;--accent:#456c22;--accent-ink:#fff;--cap:#945328;--image:#316faa;--video:#8252b1;--t-describe:#a3531f;--t-t2i:#2c68a3;--t-edit:#86680f;--t-i2v:#7a4cab;--t-t2v:#a83c6f;--t-s2v:#23775c;--warn:#a8501b;--shadow:0 20px 60px #18241322}
@@ -210,6 +210,45 @@ th:first-child,td:first-child{min-width:125px;width:145px;font-size:10px;color:v
 @media(max-width:1250px){.sidebar{padding:24px 13px 16px}}
 @media(max-width:740px){.sidebar .side-bottom{display:block;padding-top:10px}.credits{flex-direction:row;flex-wrap:wrap}.credit-card{flex:1 1 180px;min-height:0}.credit-actions{flex:1 1 100%}.side-version{display:none}#catalogSection{padding-top:22px}}
 .mine-actions{margin:4px 0 16px}.mine-tip{color:var(--muted);font-size:12px;line-height:1.7;margin-bottom:18px}.mine-filter{display:flex;gap:12px;align-items:center;margin-bottom:18px;color:var(--muted);font-size:12px}.mine-filter select,.mine-input{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:11px;width:100%;font:inherit}.mine-filter select{max-width:310px}.mine-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}.mine-cat-pill{display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-size:11px}.mine-cat-pill button{border:0;background:transparent;color:var(--muted);cursor:pointer}.mine-card-link{overflow-wrap:anywhere}.mine-input:focus{outline:2px solid var(--accent)}
+
+/* ===== NOIR 2.5 · farby kategórií =====
+   Každá kategória má svoj odtieň (--h). Karta, nadpis, tlačidlo Spustiť, filter aj bodka v menu ho zdedia.
+   Nová kategória dostane voľný odtieň automaticky; modul v kategórii dedí jej farbu. */
+:root{--cat-l:.83;--cat-c:.115;--ink-l:.23;--tint:10%;--ring:24%}
+:root[data-theme="light"]{--cat-l:.53;--cat-c:.14;--ink-l:.99;--tint:7%;--ring:18%}
+@supports not (color:oklch(0 0 0)){
+ .hued{--cat:hsl(var(--h) 72% 74%);--cat-ink:#15171b}
+ :root[data-theme="light"] .hued{--cat:hsl(var(--h) 52% 40%);--cat-ink:#fff}
+ .hued.neutral,:root[data-theme="light"] .hued.neutral{--cat:var(--muted);--cat-ink:var(--bg)}
+}
+@supports (color:oklch(0 0 0)){
+ .hued{--cat:oklch(var(--cat-l) var(--cat-c) var(--h));--cat-ink:oklch(var(--ink-l) .035 var(--h))}
+ .hued.neutral{--cat:oklch(var(--cat-l) .012 var(--h));--cat-ink:oklch(var(--ink-l) .01 var(--h))}
+}
+.card.hued .category-label{color:var(--cat);display:inline-flex;align-items:center;gap:8px;min-width:0}
+.cat-dots{display:inline-flex;gap:3px;flex:none}
+.cat-dot{width:7px;height:7px;border-radius:50%;background:var(--cat)}
+.cat-dot.second{background:var(--cat2,var(--cat));opacity:.95}
+.card.hued .btn.primary,.card.hued .card-launch{background:var(--cat);border-color:var(--cat);color:var(--cat-ink);font-weight:650;letter-spacing:.1px}
+.card.hued .btn.primary:hover{filter:brightness(1.07) saturate(1.05)}
+.card.hued .star.on,.card.hued h3 a:hover{color:var(--cat)}
+.card.hued.comparing{border-color:var(--cat)}
+.chip.hued::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--cat);margin-right:7px;vertical-align:1px}
+.chip.hued.active{color:var(--cat);border-color:var(--cat)}
+.task-item.hued{--tc:var(--cat)}
+.mine-cat-pill.hued{color:var(--cat);border-color:var(--cat)}
+@supports (background:color-mix(in oklab,red 10%,blue)){
+ .card.hued{border-color:color-mix(in oklab,var(--cat) 16%,var(--line));background:radial-gradient(120% 70% at 0 0,color-mix(in oklab,var(--cat) var(--tint),transparent),transparent 62%),var(--panel)}
+ .card.hued:hover{border-color:color-mix(in oklab,var(--cat) 55%,var(--line));box-shadow:0 22px 48px -26px color-mix(in oklab,var(--cat) 60%,transparent)}
+ .cat-dot{box-shadow:0 0 0 3px color-mix(in oklab,var(--cat) var(--ring),transparent)}
+ .cat-dot.second{box-shadow:0 0 0 3px color-mix(in oklab,var(--cat2,var(--cat)) var(--ring),transparent)}
+ .card.hued .btn.primary{box-shadow:inset 0 1px 0 color-mix(in oklab,#fff 30%,transparent),0 10px 24px -14px var(--cat)}
+ .chip.hued.active{background:color-mix(in oklab,var(--cat) 12%,transparent);border-color:color-mix(in oklab,var(--cat) 55%,transparent)}
+ .chip.hued:not(.active):hover{border-color:color-mix(in oklab,var(--cat) 45%,var(--line))}
+ .task-item.hued.active{background:color-mix(in oklab,var(--cat) 11%,transparent)}
+ .mine-cat-pill.hued{background:color-mix(in oklab,var(--cat) 10%,transparent);border-color:color-mix(in oklab,var(--cat) 40%,transparent)}
+}
+@media (prefers-reduced-motion:reduce){.card:hover{transform:none}}
 </style>
 </head>
 <body>
@@ -230,7 +269,7 @@ th:first-child,td:first-child{min-width:125px;width:145px;font-size:10px;color:v
  <div class="side-bottom">
   <div class="credits"><button class="credit-card" id="creditCard" data-action="credit" aria-label="Denná ZeroGPU kvóta — otvoriť podrobnosti"></button>
    <div class="credit-actions"><button class="btn small" data-action="quota-refresh" id="quotaRefresh">↻ Obnoviť stav</button><button class="btn small ghost" data-action="quota-key">Kľúč</button></div></div>
-  <div class="side-version" title="Moje moduly; zálohy do priečinka Noir data">NOIR 2.4.1 · 15. 11. 2026</div>
+  <div class="side-version" title="Moje moduly; zálohy do priečinka Noir data">NOIR 2.5 · 24. 11. 2026</div>
  </div>
 </aside>
 <main id="main">
@@ -280,7 +319,7 @@ th:first-child,td:first-child{min-width:125px;width:145px;font-size:10px;color:v
    <article class="help-box"><h3>Presný model a alternatíva</h3><p>Webová appka má na karte uvedenú verziu, ktorú používa. Rovnaká rodina modelov neznamená rovnaký checkpoint. Podrobnosti vždy vysvetľujú vzťah k pôvodnému katalógu.</p><p>WD Tagger a JoyCaption majú priame demá svojich pôvodných modelov. Presné demo Chroma1-HD bolo pri overení pozastavené. Verejné demá ostatných rodín majú vlastné verzie a pravidlá; podpora pôvodných NSFW variantov sa im nepripisuje.</p></article>
    <article class="help-box"><h3>Stav Space sa môže meniť</h3><p>„Hlási beh“ znamená stav RUNNING z API Hugging Face v uvedenom čase. Nepotvrdzuje dokončenie generovania. Môže sa objaviť front, limit GPU alebo chyba.</p><p>Pozastavené Space je označené a predvolený filter ho skryje. Tlačidlo „Obnoviť dostupnosť“ načíta aktuálny stav aj lajky. <a href="https://huggingface.co/docs/hub/spaces-overview" target="_blank" rel="noopener noreferrer">Čo sú HF Spaces ↗</a></p></article>
    <article class="help-box"><h3>Účet už máš v prehliadači</h3><p>Na spúšťanie cez odkazy sa prihlasuj priamo na HF. Otvorenie Môj HF účet je bežný odkaz, nie formulár na zadávanie tokenu.</p><p>Voliteľné overenie profilu z predchádzajúcej verzie zostáva k dispozícii. Zobrazí iba meno účtu v NOIR; nemení prístup k appkám. Token drží len v pamäti a nedáva ho do zálohy.</p><button class="btn small" data-action="account">Voliteľné overenie profilu</button></article>
-   <article class="help-box"><h3>Moje moduly</h3><p>Vlastná knižnica odkazov na Hugging Face: skopíruj adresu Space alebo modelu z prehliadača, vlož ju cez „Pridať modul“ a zaraď do vlastnej kategórie (AUDIO, VIDEO, IMAGE…).</p><p>NOIR ukladá len odkaz, nič neinštaluje. Moduly sú v tomto zariadení a prenesú sa v zálohe JSON.</p></article><article class="help-box"><h3>Pôvodné modely a tvoje poznámky</h3><p>Modelové repozitáre sú v časti Modely a súbory spolu s ich ID, poznámkami, obľúbenými a stavmi testovania. Repozitár poskytuje váhy a dokumentáciu; nemá automaticky webové rozhranie.</p><p>Obľúbené a poznámky nájdeš na jednom mieste pre appky aj modely. Záloha JSON je kompatibilná s predchádzajúcou verziou.</p><button class="btn small" data-action="backup">Záloha a prenos</button></article>
+   <article class="help-box"><h3>Farby kategórií</h3><p>Každá úloha má svoju farbu: nadpis karty, bodka aj tlačidlo Spustiť sú rovnaké. Appka s dvomi úlohami má dve bodky.</p><p>Nová kategória v Mojich moduloch dostane voľnú farbu sama. Ak sa volá ako úloha (VIDEO, PROMPT, SWAP, AUDIO, UPSCALE…), zdedí jej farbu. Modul má vždy farbu svojej kategórie.</p></article><article class="help-box"><h3>Moje moduly</h3><p>Vlastná knižnica odkazov na Hugging Face: skopíruj adresu Space alebo modelu z prehliadača, vlož ju cez „Pridať modul“ a zaraď do vlastnej kategórie (AUDIO, VIDEO, IMAGE…).</p><p>NOIR ukladá len odkaz, nič neinštaluje. Moduly sú v tomto zariadení a prenesú sa v zálohe JSON.</p></article><article class="help-box"><h3>Pôvodné modely a tvoje poznámky</h3><p>Modelové repozitáre sú v časti Modely a súbory spolu s ich ID, poznámkami, obľúbenými a stavmi testovania. Repozitár poskytuje váhy a dokumentáciu; nemá automaticky webové rozhranie.</p><p>Obľúbené a poznámky nájdeš na jednom mieste pre appky aj modely. Záloha JSON je kompatibilná s predchádzajúcou verziou.</p><button class="btn small" data-action="backup">Záloha a prenos</button></article>
    <article class="help-box"><h3>Čo znamená poradie</h3><p>Appky sa zoraďujú podľa lajkov ich Space. Modely podľa stiahnutí konkrétneho repozitára. Ani jeden údaj nie je počet aktívnych používateľov či hodnotenie kvality.</p><p id="helpDate">Adresy, verzie a stav boli overené z verejného HF API a zdrojov autorov. Generovanie výstupov nebolo testované.</p></article>
   </div>
  </section>
@@ -1101,7 +1140,7 @@ function safeHFLink(raw){
   if(bits.length>=2&&bits[0]!=='spaces'&&bits[0]!=='datasets'&&bits[0]!=='docs'&&bits[0]!=='settings'&&bits[0]!=='blog'&&bits[0]!=='tasks'&&bits[0]!=='organizations'&&bits[0]!=='login'&&bits[0]!=='join'&&bits[0]!=='api')return {url:'https://huggingface.co/'+encodeURIComponent(decodeURIComponent(bits[0]))+'/'+encodeURIComponent(decodeURIComponent(bits[1])),kind:'Model'};
  }catch(e){}return null;
 }
-function cleanMineCategories(raw){if(!Array.isArray(raw))return [];let out=[],seen=new Set();for(const c of raw.slice(0,MAX_CATS)){if(!c||typeof c.name!=='string'||typeof c.id!=='string')continue;const name=c.name.trim().slice(0,65),id=c.id.slice(0,100);if(!name||!id||seen.has(id))continue;seen.add(id);out.push({id,name});}return out;}
+function cleanMineCategories(raw){if(!Array.isArray(raw))return [];let out=[],seen=new Set();for(const c of raw.slice(0,MAX_CATS)){if(!c||typeof c.name!=='string'||typeof c.id!=='string')continue;const name=c.name.trim().slice(0,65),id=c.id.slice(0,100);if(!name||!id||seen.has(id))continue;seen.add(id);const hue=Number.isFinite(c.hue)?((Math.round(c.hue)%360)+360)%360:undefined;out.push(hue===undefined?{id,name}:{id,name,hue});}return out;}
 function cleanMineModules(raw,cats){if(!Array.isArray(raw))return [];let out=[],seen=new Set();for(const x of raw.slice(0,MAX_MINE)){if(!x||typeof x!=='object')continue;const link=safeHFLink(x.url);if(!link||seen.has(link.url))continue;seen.add(link.url);let category=cats.some(c=>c.id===x.category)?x.category:'';out.push({id:typeof x.id==='string'&&x.id.length<100?x.id:'mine-'+out.length,url:link.url,kind:link.kind,name:String(x.name||link.url.split('/').pop()).trim().slice(0,120),category,description:String(x.description||'').slice(0,1200)});}return out;}
 function uniqueMineID(){return 'mine-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);}
 function categoryName(id){return (state.mineCategories.find(c=>c.id===id)||{}).name||'Bez kategórie';}
@@ -1109,16 +1148,33 @@ function renderMine(){
  const select=$('#mineCategory');if(!['all','uncategorized'].includes(mineFilter)&&!state.mineCategories.some(c=>c.id===mineFilter))mineFilter='all';
  select.innerHTML='<option value="all">Všetky kategórie</option><option value="uncategorized">Bez kategórie</option>'+state.mineCategories.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('');select.value=mineFilter;
  const items=state.mineModules.filter(m=>mineFilter==='all'||(mineFilter==='uncategorized'&&!m.category)||m.category===mineFilter);
- $('#mineCards').innerHTML=items.map(m=>'<article class="card"><div class="card-top"><span class="category-label">'+esc(categoryName(m.category))+'</span><span class="tag">'+esc(m.kind)+'</span></div><h3>'+esc(m.name)+'</h3><p class="repo-owner mine-card-link">'+esc(m.url)+'</p><p class="card-desc">'+esc(m.description||'Tvoj vlastný modul z Hugging Face')+'</p><a class="btn primary card-launch" href="'+esc(m.url)+'" target="_blank" rel="noopener noreferrer">Otvoriť na HF ↗</a><div class="card-actions"><button class="btn small" data-action="edit-mine" data-id="'+esc(m.id)+'">Upraviť</button><button class="btn small ghost" data-action="delete-mine" data-id="'+esc(m.id)+'">Odstrániť</button></div></article>').join('');
+ $('#mineCards').innerHTML=items.map(m=>{const h=catHueById(m.category);return '<article class="card hued'+(h===null?' neutral':'')+'"'+hueStyle(h===null?250:h)+'><div class="card-top"><span class="category-label"><span class="cat-dots" aria-hidden="true"><span class="cat-dot"></span></span>'+esc(categoryName(m.category))+'</span><span class="tag">'+esc(m.kind)+'</span></div><h3>'+esc(m.name)+'</h3><p class="repo-owner mine-card-link">'+esc(m.url)+'</p><p class="card-desc">'+esc(m.description||'Tvoj vlastný modul z Hugging Face')+'</p><a class="btn primary card-launch" href="'+esc(m.url)+'" target="_blank" rel="noopener noreferrer">Otvoriť na HF ↗</a><div class="card-actions"><button class="btn small" data-action="edit-mine" data-id="'+esc(m.id)+'">Upraviť</button><button class="btn small ghost" data-action="delete-mine" data-id="'+esc(m.id)+'">Odstrániť</button></div></article>';}).join('');
  $('#mineEmpty').hidden=items.length>0;$('#mineEmpty h3').textContent=state.mineModules.length?'V tejto kategórii zatiaľ nič nie je.':'Zatiaľ nemáš vlastné moduly.';
- $('#mineCategories').innerHTML=state.mineCategories.length?'<h3 style="font-size:13px;margin:25px 0 10px">Správa kategórií</h3><div class="mine-tags">'+state.mineCategories.map(c=>'<span class="mine-cat-pill">'+esc(c.name)+' <button data-action="delete-category" data-id="'+esc(c.id)+'" aria-label="Odstrániť kategóriu '+esc(c.name)+'" title="Odstrániť kategóriu (moduly zostanú)">×</button></span>').join('')+'</div>':'';
+ $('#mineCategories').innerHTML=state.mineCategories.length?'<h3 style="font-size:13px;margin:25px 0 10px">Správa kategórií</h3><div class="mine-tags">'+state.mineCategories.map(c=>'<span class="mine-cat-pill hued"'+hueStyle(Number.isFinite(c.hue)?c.hue:250)+'>'+esc(c.name)+' <button data-action="delete-category" data-id="'+esc(c.id)+'" aria-label="Odstrániť kategóriu '+esc(c.name)+'" title="Odstrániť kategóriu (moduly zostanú)">×</button></span>').join('')+'</div>':'';
 }
-function openCategoryEditor(){openModal('Nová kategória','Napríklad AUDIO, VIDEO, IMAGE, MASTERING…','<form id="mineCategoryForm"><label class="field">Názov kategórie<input class="mine-input" id="newMineCategory" required maxlength="65" placeholder="Napríklad AUDIO" autocomplete="off"></label><div class="backup-row"><button class="btn primary" type="submit">Vytvoriť kategóriu</button></div></form>',false);$('#newMineCategory').focus();$('#mineCategoryForm').addEventListener('submit',function(e){e.preventDefault();const name=$('#newMineCategory').value.trim();if(!name)return;if(state.mineCategories.length>=MAX_CATS){toast('Dosiahnutý limit kategórií.');return;}if(state.mineCategories.some(c=>normalize(c.name)===normalize(name))){toast('Táto kategória už existuje.');return;}const id=uniqueMineID();state.mineCategories.push({id,name});persist();mineFilter=id;closeModal();showView('mine');toast('Kategória vytvorená.');});}
+function openCategoryEditor(){openModal('Nová kategória','Napríklad AUDIO, VIDEO, IMAGE, MASTERING…','<form id="mineCategoryForm"><label class="field">Názov kategórie<input class="mine-input" id="newMineCategory" required maxlength="65" placeholder="Napríklad AUDIO" autocomplete="off"></label><div class="backup-row"><button class="btn primary" type="submit">Vytvoriť kategóriu</button></div></form>',false);$('#newMineCategory').focus();$('#mineCategoryForm').addEventListener('submit',function(e){e.preventDefault();const name=$('#newMineCategory').value.trim();if(!name)return;if(state.mineCategories.length>=MAX_CATS){toast('Dosiahnutý limit kategórií.');return;}if(state.mineCategories.some(c=>normalize(c.name)===normalize(name))){toast('Táto kategória už existuje.');return;}const id=uniqueMineID();state.mineCategories.push({id,name,hue:newCategoryHue(name)});persist();mineFilter=id;closeModal();showView('mine');toast('Kategória vytvorená.');});}
 function openMineEditor(id){const item=state.mineModules.find(m=>m.id===id);const options='<option value="">Bez kategórie</option>'+state.mineCategories.map(c=>'<option value="'+esc(c.id)+'" '+(item&&item.category===c.id?'selected':'')+'>'+esc(c.name)+'</option>').join('');
  openModal(item?'Upraviť HF modul':'Pridať HF modul','Vlož adresu konkrétneho Space alebo modelu na huggingface.co','<form id="mineForm"><label class="field">Odkaz na HF modul *<input class="mine-input" id="mineUrl" type="url" required placeholder="https://huggingface.co/spaces/autor/modul" value="'+esc(item?item.url:'')+'"></label><label class="field">Názov modulu<input class="mine-input" id="mineName" maxlength="120" placeholder="Doplní sa z odkazu" value="'+esc(item?item.name:'')+'"></label><label class="field">Kategória<select class="mine-input" id="mineCat">'+options+'</select></label><label class="field">Popis / poznámka<textarea id="mineDesc" maxlength="1200" placeholder="Čo modul robí, na čo ho používam…">'+esc(item?item.description:'')+'</textarea></label><p class="field-hint">Vkladaj iba odkazy na konkrétne Hugging Face Spaces alebo modelové repozitáre. NOIR len ukladá odkaz, neinštaluje nástroj.</p><div class="backup-row"><button class="btn primary" type="submit">'+(item?'Uložiť zmeny':'Pridať do NOIR')+'</button></div></form>',false);
  $('#mineUrl').focus();$('#mineForm').addEventListener('submit',function(e){e.preventDefault();const link=safeHFLink($('#mineUrl').value);if(!link){toast('Zadaj platný odkaz na HF Space alebo model.');return;}if(state.mineModules.some(m=>m.url===link.url&&m.id!==id)){toast('Tento HF modul už máš uložený.');return;}if(!item&&state.mineModules.length>=MAX_MINE){toast('Dosiahnutý limit 500 modulov.');return;}const record={id:item?item.id:uniqueMineID(),url:link.url,kind:link.kind,name:($('#mineName').value.trim()||decodeURIComponent(link.url.split('/').pop())).slice(0,120),category:$('#mineCat').value,description:$('#mineDesc').value.trim()};if(item)Object.assign(item,record);else state.mineModules.push(record);persist();mineFilter='all';closeModal();showView('mine');toast('Modul uložený do NOIR.');});}
 function deleteMine(id){const m=state.mineModules.find(m=>m.id===id);if(!m||!confirm('Odstrániť modul „'+m.name+'“ z NOIR?'))return;state.mineModules=state.mineModules.filter(x=>x.id!==id);persist();render();toast('Modul odstránený.');}
 function deleteMineCategory(id){const cat=state.mineCategories.find(c=>c.id===id);if(!cat||!confirm('Odstrániť kategóriu „'+cat.name+'“? Moduly zostanú v Bez kategórie.'))return;state.mineCategories=state.mineCategories.filter(c=>c.id!==id);state.mineModules.forEach(m=>{if(m.category===id)m.category='';});mineFilter='all';persist();render();toast('Kategória odstránená; moduly zostali.');}
+
+/* ---------- NOIR 2.5 · farebná logika kategórií ---------- */
+// Pevné odtiene pre známe úlohy. Nová úloha v katalógu dostane odtieň sama (zlatý uhol), modul dedí farbu svojej kategórie.
+const TASK_HUES={describe:52,t2i:250,edit:92,i2v:300,t2v:352,s2v:168,swap:24};
+const HUE_WORDS=[[/swap|face|tv[aá]r|deepfake/i,24],[/prompt|caption|opis|tag/i,52],[/video|i2v|t2v|anim|pohyb/i,300],[/edit|[uú]prav|inpaint|retu/i,92],[/zvuk|audio|sound|hudb|music|voice|hlas|s2v/i,168],[/upscal|zv[aä][cč]|enhanc|ostr/i,135],[/3d|mesh|model 3/i,205],[/image|obr[aá]z|foto|t2i|pic/i,250]];
+const HUE_SLOTS=[330,275,112,185,228,70,8]; // voľné odtiene mimo úloh a kľúčových slov
+function hashStr(t){let h=2166136261;for(const ch of String(t)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+function hueDist(a,b){const d=Math.abs(a-b)%360;return d>180?360-d:d;}
+function taskHue(t){return Object.prototype.hasOwnProperty.call(TASK_HUES,t)?TASK_HUES[t]:Math.round((hashStr(t)*137.508)%360);}
+function wordHue(name){for(const w of HUE_WORDS)if(w[0].test(name||''))return w[1];return null;}
+function freeHue(taken){for(const h of HUE_SLOTS)if(taken.every(function(t){return hueDist(h,t)>=16;}))return h;let h=Math.round((taken.length*137.508)%360);return h;}
+function newCategoryHue(name){const w=wordHue(name);if(w!==null)return w;const taken=Object.values(TASK_HUES).concat(state.mineCategories.map(function(c){return c.hue;}).filter(Number.isFinite));return freeHue(taken);}
+function ensureCategoryHues(){let changed=false;state.mineCategories.forEach(function(c){if(!Number.isFinite(c.hue)){c.hue=newCategoryHue(c.name);changed=true;}});return changed;}
+function catHueById(id){const c=state.mineCategories.find(function(x){return x.id===id;});return c&&Number.isFinite(c.hue)?c.hue:null;}
+function hueStyle(h,h2){return ' style="--h:'+h+(h2!=null&&h2!==h?';--cat2:'+hueColor(h2):'')+'"';}
+function hueColor(h){return (window.CSS&&CSS.supports('color','oklch(0 0 0)'))?'oklch(var(--cat-l) var(--cat-c) '+h+')':'hsl('+h+' 70% 70%)';}
+function cardHue(m){return taskHue(m.tasks[0]);}
 function cleanPersonal(raw){
  if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('Neplatné údaje.');
  raw=Object.assign({},raw,{notes:aliasMap(raw.notes),status:aliasMap(raw.status),metrics:aliasMap(raw.metrics),gpu:aliasMap(raw.gpu),favorites:Array.isArray(raw.favorites)?raw.favorites.map(function(x){return typeof x==='string'?alias(x):x;}):raw.favorites});
@@ -1149,6 +1205,7 @@ function defaultCredit(){return {limit:40,start:null,log:[]};}
 let state={favorites:[],notes:{},status:{},theme:'dark',metrics:{},credit:defaultCredit(),gpu:{},mineCategories:[],mineModules:[]};
 let storageOK=true;
 try{const raw=localStorage.getItem(KEY);if(raw)state=cleanPersonal(JSON.parse(raw));}catch(e){storageOK=false;}
+if(ensureCategoryHues()&&storageOK){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
 let view='apps',task='all',query='',type='all',sort='likes',runtimeFilter='running',compare=[];
 let session=null; // appka otvorená z NOIR, ku ktorej sa zapisuje spotreba GPU
 let lastFocus=null,toastTimer=null,refreshBusy=false,detailID=null;
@@ -1351,8 +1408,8 @@ function taskLabel(m){return m.tasks.map(function(t){return TASKS[t];}).join(' �
 function renderTasks(){
  const base=viewBase();
  const items=[['all','Všetko',base.length]].concat(Object.keys(TASKS).map(function(t){return [t,TASKS[t],base.filter(function(m){return m.tasks.includes(t);}).length];}));
- $('#taskNav').innerHTML=items.map(function(x){const on=task===x[0]&&view!=='help';return '<button class="task-item'+(on?' active':'')+(x[2]?'':' empty-task')+'" data-task="'+x[0]+'" aria-pressed="'+on+'" style="--tc:var('+(x[0]==='all'?'--accent':'--t-'+x[0])+')"><span class="task-dot" aria-hidden="true"></span><span class="task-name">'+esc(x[1])+'</span><span class="task-count">'+x[2]+'</span></button>';}).join('');
- $('#taskChips').innerHTML=items.map(function(x){const on=task===x[0];return '<button class="chip'+(on?' active':'')+'" data-task="'+x[0]+'" aria-pressed="'+on+'">'+esc(x[1])+' · '+x[2]+'</button>';}).join('');
+ $('#taskNav').innerHTML=items.map(function(x){const on=task===x[0]&&view!=='help';return '<button class="task-item'+(x[0]==='all'?'':' hued')+(on?' active':'')+(x[2]?'':' empty-task')+'" data-task="'+x[0]+'" aria-pressed="'+on+'"'+(x[0]==='all'?' style="--tc:var(--accent)"':hueStyle(taskHue(x[0])))+'><span class="task-dot" aria-hidden="true"></span><span class="task-name">'+esc(x[1])+'</span><span class="task-count">'+x[2]+'</span></button>';}).join('');
+ $('#taskChips').innerHTML=items.map(function(x){const on=task===x[0];return '<button class="chip'+(x[0]==='all'?'':' hued')+(on?' active':'')+'" data-task="'+x[0]+'" aria-pressed="'+on+'"'+(x[0]==='all'?'':hueStyle(taskHue(x[0])))+'>'+esc(x[1])+' · '+x[2]+'</button>';}).join('');
 }
 function filteredModels(){
  const q=normalize(query).trim();
@@ -1403,8 +1460,9 @@ function render(){
   const stats=metric(m),fav=state.favorites.includes(m.id),chosen=compare.includes(m.id),isApp=m.type==='space';
   const note=state.notes[m.id]||'';
   const metrics=isApp?'<span class="runtime-badge '+(running(m)?'running':'unavailable')+'">'+esc(stageLabel(m))+'</span><span class="likes" title="Lajky konkrétneho Space">♡ '+full(stats.likes)+'</span>':'<span class="likes" title="Stiahnutia za posledný mesiac">↓ '+compact(stats.downloads)+' / mesiac</span><span class="likes">♡ '+full(stats.likes)+'</span>';
-  return '<article class="card'+(chosen?' comparing':'')+'" data-id="'+esc(m.id)+'">'+
-   '<div class="card-top"><span class="category-label" style="color:var(--t-'+m.tasks[0]+')">'+esc(taskLabel(m))+'</span><button class="star'+(fav?' on':'')+'" data-favorite="'+esc(m.id)+'" aria-pressed="'+fav+'" aria-label="'+(fav?'Odobrať z obľúbených: ':'Pridať k obľúbeným: ')+esc(m.name)+'">'+(fav?'★':'☆')+'</button></div>'+
+  const h1=cardHue(m),h2=m.tasks[1]?taskHue(m.tasks[1]):null;
+  return '<article class="card hued'+(chosen?' comparing':'')+'" data-id="'+esc(m.id)+'"'+hueStyle(h1,h2)+'>'+
+   '<div class="card-top"><span class="category-label"><span class="cat-dots" aria-hidden="true"><span class="cat-dot"></span>'+(h2!=null&&h2!==h1?'<span class="cat-dot second"></span>':'')+'</span>'+esc(taskLabel(m))+'</span><button class="star'+(fav?' on':'')+'" data-favorite="'+esc(m.id)+'" aria-pressed="'+fav+'" aria-label="'+(fav?'Odobrať z obľúbených: ':'Pridať k obľúbeným: ')+esc(m.name)+'">'+(fav?'★':'☆')+'</button></div>'+
    '<h3><a href="'+esc(entryURL(m))+'" target="_blank" rel="noopener noreferrer" title="'+(isApp?'Otvoriť webovú appku':'Otvoriť model a súbory')+'">'+esc(m.name)+'</a></h3><div class="repo-owner">'+esc(isApp?m.spaceId:m.id)+'</div>'+
    '<p class="card-version">Verzia: '+esc(m.version)+'</p><p class="card-desc">'+esc(m.description)+'</p>'+
    '<div class="tags"><span class="tag">'+esc(TYPES[m.type])+'</span>'+m.tags.map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join('')+'</div>'+
