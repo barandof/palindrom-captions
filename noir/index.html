@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="color-scheme" content="dark light">
 <meta name="description" content="NOIR — spúšťač webových appiek Hugging Face s odpočtom dennej ZeroGPU kvóty, výberom podľa toho, čo práve tvoríš, a prehľadom modelových súborov.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://huggingface.co; img-src 'self'; manifest-src 'self'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self' https://huggingface.co; img-src 'self'; manifest-src 'self'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>NOIR 2.5 — Hugging Face / App Launcher</title>
 <style>
 :root{--bg:#0d0f12;--side:#101215;--panel:#16191e;--panel2:#1c2026;--text:#f0f2ed;--muted:#a4aab3;--subtle:#7f8894;--line:#2b3037;--accent:#c2ee86;--accent-ink:#1b2a0b;--cap:#eeb586;--image:#8cbdff;--video:#c5acf1;--t-describe:#eeb586;--t-t2i:#8cbdff;--t-edit:#e8d48b;--t-i2v:#c5acf1;--t-t2v:#f2a7c9;--t-s2v:#9fe0c6;--warn:#f0a36b;--radius:18px;--shadow:0 20px 70px #0007}
@@ -1752,5 +1752,17 @@ window.addEventListener('online',function(){refreshQuota();});
 setInterval(function(){if(creditCheck())render();else renderCredit();},60000);
 $('#storageWarning').hidden=storageOK;render();renderAccount();refreshQuota();
 </script>
-</body>
+<script>
+/* iPhone: appka z plochy si drží starú verziu v pamäti. Pri spustení si overí, či na GitHube nie je novšia, a ak áno, načíta ju. */
+(function(){
+ const mine=((document.querySelector('.side-version')||{}).textContent||'').trim();
+ function check(){
+  fetch('./index.html?check='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(function(t){
+   const m=t.match(/class="side-version"[^>]*>([^<]+)</);const live=m?m[1].trim():'';
+   if(live&&mine&&live!==mine){const v=encodeURIComponent(((live.match(/\d+(\.\d+)*/)||[''])[0])||Date.now());if(!location.search.includes('v='+v))location.replace('./?v='+v);}
+  }).catch(function(){});
+ }
+ check();document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')check();});
+})();
+</script></body>
 </html>
